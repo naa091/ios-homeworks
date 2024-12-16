@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import StorageService
 
 class PostViewController: UIViewController {
     let customBackgroundColor: UIColor
@@ -21,6 +22,11 @@ class PostViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = customBackgroundColor
+#if DEBUG
+        view.backgroundColor = .red
+#else
+        view.backgroundColor = .green
+#endif
+        let post = Post(title: "")
     }
 }
