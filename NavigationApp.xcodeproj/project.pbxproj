@@ -6,11 +6,48 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		090F80C72CFDB9EA005C18F2 /* StorageService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 090F80BF2CFDB9EA005C18F2 /* StorageService.framework */; };
+		090F80C82CFDB9EA005C18F2 /* StorageService.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 090F80BF2CFDB9EA005C18F2 /* StorageService.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		090F80C52CFDB9EA005C18F2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 095870FF2CBFC0AE009F2789 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 090F80BE2CFDB9EA005C18F2;
+			remoteInfo = StorageService;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		090F809C2CFDB391005C18F2 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				090F80C82CFDB9EA005C18F2 /* StorageService.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		090F80BF2CFDB9EA005C18F2 /* StorageService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = StorageService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		095871072CBFC0AE009F2789 /* NavigationApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NavigationApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		090F80CC2CFDB9EA005C18F2 /* Exceptions for "StorageService" folder in "StorageService" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			publicHeaders = (
+				StorageService.h,
+			);
+			target = 090F80BE2CFDB9EA005C18F2 /* StorageService */;
+		};
 		095871192CBFC0AF009F2789 /* Exceptions for "NavigationApp" folder in "NavigationApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -21,6 +58,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		090F80C02CFDB9EA005C18F2 /* StorageService */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				090F80CC2CFDB9EA005C18F2 /* Exceptions for "StorageService" folder in "StorageService" target */,
+			);
+			path = StorageService;
+			sourceTree = "<group>";
+		};
 		095871092CBFC0AE009F2789 /* NavigationApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,10 +77,18 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		090F80BC2CFDB9EA005C18F2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		095871042CBFC0AE009F2789 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				090F80C72CFDB9EA005C18F2 /* StorageService.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				095871092CBFC0AE009F2789 /* NavigationApp */,
+				090F80C02CFDB9EA005C18F2 /* StorageService */,
 				095871082CBFC0AE009F2789 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,13 +108,47 @@
 			isa = PBXGroup;
 			children = (
 				095871072CBFC0AE009F2789 /* NavigationApp.app */,
+				090F80BF2CFDB9EA005C18F2 /* StorageService.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		090F80BA2CFDB9EA005C18F2 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
+		090F80BE2CFDB9EA005C18F2 /* StorageService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 090F80C92CFDB9EA005C18F2 /* Build configuration list for PBXNativeTarget "StorageService" */;
+			buildPhases = (
+				090F80BA2CFDB9EA005C18F2 /* Headers */,
+				090F80BB2CFDB9EA005C18F2 /* Sources */,
+				090F80BC2CFDB9EA005C18F2 /* Frameworks */,
+				090F80BD2CFDB9EA005C18F2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				090F80C02CFDB9EA005C18F2 /* StorageService */,
+			);
+			name = StorageService;
+			packageProductDependencies = (
+			);
+			productName = StorageService;
+			productReference = 090F80BF2CFDB9EA005C18F2 /* StorageService.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 		095871062CBFC0AE009F2789 /* NavigationApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0958711A2CBFC0AF009F2789 /* Build configuration list for PBXNativeTarget "NavigationApp" */;
@@ -68,10 +156,12 @@
 				095871032CBFC0AE009F2789 /* Sources */,
 				095871042CBFC0AE009F2789 /* Frameworks */,
 				095871052CBFC0AE009F2789 /* Resources */,
+				090F809C2CFDB391005C18F2 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				090F80C62CFDB9EA005C18F2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				095871092CBFC0AE009F2789 /* NavigationApp */,
@@ -90,9 +180,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1600;
+				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					090F80BE2CFDB9EA005C18F2 = {
+						CreatedOnToolsVersion = 16.1;
+					};
 					095871062CBFC0AE009F2789 = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -113,11 +206,19 @@
 			projectRoot = "";
 			targets = (
 				095871062CBFC0AE009F2789 /* NavigationApp */,
+				090F80BE2CFDB9EA005C18F2 /* StorageService */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		090F80BD2CFDB9EA005C18F2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		095871052CBFC0AE009F2789 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +229,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		090F80BB2CFDB9EA005C18F2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		095871032CBFC0AE009F2789 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -137,7 +245,87 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		090F80C62CFDB9EA005C18F2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 090F80BE2CFDB9EA005C18F2 /* StorageService */;
+			targetProxy = 090F80C52CFDB9EA005C18F2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		090F80CA2CFDB9EA005C18F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = P2W83Z8LVL;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.AleksandrNistratov.StorageService;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		090F80CB2CFDB9EA005C18F2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = P2W83Z8LVL;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_MODULE_VERIFIER = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 16;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
+				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu17 gnu++20";
+				PRODUCT_BUNDLE_IDENTIFIER = com.AleksandrNistratov.StorageService;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_INSTALL_OBJC_HEADER = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 		0958711B2CBFC0AF009F2789 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -152,6 +340,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -179,6 +368,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -314,6 +504,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		090F80C92CFDB9EA005C18F2 /* Build configuration list for PBXNativeTarget "StorageService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				090F80CA2CFDB9EA005C18F2 /* Debug */,
+				090F80CB2CFDB9EA005C18F2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		095871022CBFC0AE009F2789 /* Build configuration list for PBXProject "NavigationApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
