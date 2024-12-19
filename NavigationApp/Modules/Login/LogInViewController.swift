@@ -8,9 +8,10 @@
 import UIKit
 
 class LogInViewController: UIViewController {
+    private let viewModel: LoginViewModeling
+    
     lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
         
         return scrollView
     }()
@@ -18,7 +19,6 @@ class LogInViewController: UIViewController {
     lazy var contentView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
-        view.translatesAutoresizingMaskIntoConstraints = false
         
         return view
     }()
@@ -27,7 +27,6 @@ class LogInViewController: UIViewController {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "logo")
         imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         
         return imageView
     }()
@@ -44,7 +43,6 @@ class LogInViewController: UIViewController {
         textField.leftViewMode = .always
         textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
         textField.rightViewMode = .always
-        textField.translatesAutoresizingMaskIntoConstraints = false
         
         return textField
     }()
@@ -62,7 +60,6 @@ class LogInViewController: UIViewController {
         textField.leftViewMode = .always
         textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField.frame.height))
         textField.rightViewMode = .always
-        textField.translatesAutoresizingMaskIntoConstraints = false
         
         return textField
     }()
@@ -74,17 +71,19 @@ class LogInViewController: UIViewController {
         button.backgroundColor = .systemBlue
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(logInButtonTapped), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         
         return button
     }()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    init(viewModel: LoginViewModeling) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
         
         setupView()
         setupConstraints()
     }
+    
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -94,12 +93,9 @@ class LogInViewController: UIViewController {
 
 private extension LogInViewController {
     func setupView() {
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(logoImageView)
-        contentView.addSubview(loginTextField)
-        contentView.addSubview(passwordTextField)
-        contentView.addSubview(logInButton)
+        view.addSubviews(views: [scrollView])
+        scrollView.addSubviews(views: [contentView])
+        contentView.addSubviews(views: [logoImageView, loginTextField, passwordTextField, logInButton])
     }
     
     func setupConstraints() {
@@ -137,10 +133,7 @@ private extension LogInViewController {
     }
     
     @objc func logInButtonTapped() {
-        // создал объект ProfileViewController
-        let profileViewController = ProfileViewController()
-        // переход на ProfileViewController
-        navigationController?.pushViewController(profileViewController, animated: true)
+        viewModel.login()
     }
     
 }
