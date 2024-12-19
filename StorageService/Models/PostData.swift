@@ -2,17 +2,17 @@
 //  PostData.swift
 //  NavigationApp
 //
-//  Created by Александр Нистратов on 03.11.2024.
+//  Created by Александр Нистратов on 16.12.2024.
 //
 
-struct PostData {
-    let author: String?
-    let description: String?
-    let nameImage: String? = nil
-    let likes: Int? = nil
-    let views: Int? = nil
+public struct PostData {
+    public let author: String?
+    public let description: String?
+    public let nameImage: String? = nil
+    public let likes: Int? = nil
+    public let views: Int? = nil
     
-    static func getMockData(count: Int) -> [PostData] {
+    public static func getMockData(count: Int) -> [PostData] {
         var mockData: [PostData] = []
         
         for item in 1...count {
@@ -27,4 +27,3 @@ struct PostData {
         return mockData
     }
 }
-

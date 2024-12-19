@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ProfileHeaderView: UIView {
+class ProfileHeaderView: UITableViewHeaderFooterView {
     private var statusText: String = ""
     
     lazy var avatarImageView: UIImageView = {
@@ -17,7 +17,6 @@ class ProfileHeaderView: UIView {
         imageView.layer.borderWidth = 3
         imageView.layer.borderColor = UIColor.white.cgColor
         imageView.clipsToBounds = true
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         
         return imageView
     }()
@@ -27,7 +26,6 @@ class ProfileHeaderView: UIView {
         label.text = "Шкет"
         label.font = UIFont.systemFont(ofSize: 18, weight: .bold)
         label.textColor = .black
-        label.translatesAutoresizingMaskIntoConstraints = false
         
         return label
     }()
@@ -36,7 +34,6 @@ class ProfileHeaderView: UIView {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
         label.textColor = .gray
-        label.translatesAutoresizingMaskIntoConstraints = false
         
         return label
     }()
@@ -54,7 +51,6 @@ class ProfileHeaderView: UIView {
         textField.leftViewMode = .always
         textField.clipsToBounds = true
         textField.addTarget(self, action: #selector(statusTextChanged), for: .editingChanged)
-        textField.translatesAutoresizingMaskIntoConstraints = false
         
         return textField
     }()
@@ -70,13 +66,13 @@ class ProfileHeaderView: UIView {
         button.layer.shadowColor = UIColor.black.cgColor
         button.layer.shadowOpacity = 0.7
         button.addTarget(self, action: #selector(setStatusButtonTapped), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
         
         return button
     }()
     
-    override init(frame: CGRect = .zero) {
-        super.init(frame: frame)
+    override init(reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
+        
         setupView()
         setupConstraints()
     }
@@ -94,11 +90,7 @@ class ProfileHeaderView: UIView {
 private extension ProfileHeaderView {
     func setupView() {
         backgroundColor = UIColor.lightGray.withAlphaComponent(0.5)
-        addSubview(avatarImageView)
-        addSubview(setStatusButton)
-        addSubview(statusTextField)
-        addSubview(fullNameLabel)
-        addSubview(statusLabel)
+        addSubviews(views: [avatarImageView, setStatusButton, statusTextField, fullNameLabel, statusLabel])
     }
     
     func setupConstraints() {

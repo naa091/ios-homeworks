@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import StorageService
 
 class PostViewController: UIViewController {
     let customBackgroundColor: UIColor
@@ -27,6 +26,5 @@ class PostViewController: UIViewController {
 #else
         view.backgroundColor = .green
 #endif
-        let post = Post(title: "")
     }
 }
