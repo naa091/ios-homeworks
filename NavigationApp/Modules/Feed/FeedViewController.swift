@@ -6,13 +6,13 @@
 //
 
 import UIKit
-//
+import SnapKit
+
 class FeedViewController: UIViewController {
     lazy var verticalStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [])
         stackView.axis = .vertical
         stackView.spacing = 10
-        stackView.translatesAutoresizingMaskIntoConstraints = false
         
         return stackView
     }()
@@ -23,7 +23,6 @@ class FeedViewController: UIViewController {
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 10
         button.backgroundColor = .systemBlue
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(openPostTapped), for: .touchUpInside)
         
         return button
@@ -35,7 +34,6 @@ class FeedViewController: UIViewController {
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 10
         button.backgroundColor = .systemCyan
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(testTapped), for: .touchUpInside)
         
         return button
@@ -56,16 +54,19 @@ private extension FeedViewController {
     }
     
     func setupConstraints() {
-        NSLayoutConstraint.activate([
-            verticalStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            verticalStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            
-            openPostButton.heightAnchor.constraint(equalToConstant: 50),
-            openPostButton.widthAnchor.constraint(equalToConstant: 100),
-            
-            testButton.heightAnchor.constraint(equalToConstant: 50),
-            testButton.widthAnchor.constraint(equalToConstant: 100),
-        ])
+        verticalStackView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        
+        openPostButton.snp.makeConstraints { make in
+            make.height.equalTo(50)
+            make.width.equalTo(100)
+        }
+    
+        testButton.snp.makeConstraints { make in
+            make.height.equalTo(50)
+            make.width.equalTo(100)
+        }
     }
     
     @objc func openPostTapped() {

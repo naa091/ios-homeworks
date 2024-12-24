@@ -46,12 +46,9 @@ private extension ProfileViewController {
     }
    
     func setupConstraints() {
-        NSLayoutConstraint.activate([
-            profileTableView.topAnchor.constraint(equalTo: view.topAnchor),
-            profileTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            profileTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            profileTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
+        profileTableView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
     }
     
     func setNavigation() {
