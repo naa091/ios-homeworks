@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import SnapKit
+import iOSIntPackage
 
 class PostTableViewCell: UITableViewCell {
     private lazy var postTitleLabel: UILabel = {
@@ -14,30 +16,26 @@ class PostTableViewCell: UITableViewCell {
         label.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         label.textColor = .black
         label.numberOfLines = 2
-        label.translatesAutoresizingMaskIntoConstraints = false
         
         return label
     }()
     
     private lazy var postImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "Шкет")
         imageView.contentMode = .scaleAspectFit
         imageView.backgroundColor = .black
         imageView.clipsToBounds = true
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         
         return imageView
     }()
     
-    private lazy var postTextView: UITextView = {
-        let textView = UITextView()
-        textView.text = "высокий женский головной убор или причёска ◆ Во-о-от, развалили страну демократы, — поправив кандибобер на голове, завела песню одна. Михаил Рябиков, «А вдоль дороги старушки с гастарбайтерами стоят…», 2019 г. // «Комсомольская правда», Москва [Google Книги] ◆ Через остановку вышла женщина в кандибобере, а ещё через пару о происшествии почти забыли. Дмитрий Билик, «Временщик», Книга первая, 2021 г. // «Комсомольская правда», Москва [Google Книги]"
-        textView.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        textView.textColor = .systemGray
-        textView.translatesAutoresizingMaskIntoConstraints = false
+    private lazy var postTextLabel: UILabel = {
+        let label = UILabel()
+        label.text = "высокий женский головной убор или причёска ◆ Во-о-от, развалили страну демократы, — поправив кандибобер на голове, завела песню одна. Михаил Рябиков, «А вдоль дороги старушки с гастарбайтерами стоят…», 2019 г. // «Комсомольская правда», Москва [Google Книги] ◆ Через остановку вышла женщина в кандибобере, а ещё через пару о происшествии почти забыли. Дмитрий Билик, «Временщик», Книга первая, 2021 г. // «Комсомольская правда», Москва [Google Книги]"
+        label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
+        label.textColor = .systemGray
         
-        return textView
+        return label
     }()
     
     private lazy var postLikesLabel: UILabel = {
@@ -45,25 +43,24 @@ class PostTableViewCell: UITableViewCell {
         label.text = "Likes"
         label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
         label.textColor = .black
-        label.translatesAutoresizingMaskIntoConstraints = false
         
         return label
     }()
     
     private lazy var postViewLabel: UILabel = {
-    let label = UILabel()
-    label.text = "Views"
-    label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-    label.textColor = .black
-    label.translatesAutoresizingMaskIntoConstraints = false
-    
-    return label
-}()
+        let label = UILabel()
+        label.text = "Views"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
+        label.textColor = .black
+        
+        return label
+    }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupCell()
         setupConstraints()
+        processImage(named: "Шкет")
     }
     
     required init?(coder: NSCoder) {
@@ -73,35 +70,54 @@ class PostTableViewCell: UITableViewCell {
 
 private extension PostTableViewCell {
     func setupCell() {
-        contentView.addSubview(postTitleLabel)
-        contentView.addSubview(postImageView)
-        contentView.addSubview(postTextView)
-        contentView.addSubview(postLikesLabel)
-        contentView.addSubview(postViewLabel)
+        contentView.addSubviews(views: [postImageView, postTitleLabel, postTextLabel, postLikesLabel, postViewLabel])
     }
     
     func setupConstraints() {
-        NSLayoutConstraint.activate([
-            postTitleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 16),
-            postTitleLabel.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
-            postTitleLabel.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
-            
-            postImageView.heightAnchor.constraint(equalToConstant: 250),
-            postImageView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor),
-            postImageView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor),
-            postImageView.topAnchor.constraint(equalTo: postTitleLabel.bottomAnchor, constant: 16),
-            
-            postTextView.heightAnchor.constraint(equalToConstant: 100),
-            postTextView.leadingAnchor.constraint(equalTo: self.contentView.leadingAnchor, constant: 16),
-            postTextView.trailingAnchor.constraint(equalTo: self.contentView.trailingAnchor, constant: -16),
-            postTextView.topAnchor.constraint(equalTo: postImageView.bottomAnchor, constant: 16),
-            
-            postLikesLabel.topAnchor.constraint(equalTo: postTextView.bottomAnchor, constant: 16),
-            postLikesLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-            
-            postViewLabel.topAnchor.constraint(equalTo: postTextView.bottomAnchor, constant: 16),
-            postViewLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
-            postViewLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -16)
-        ])
+        postTitleLabel.snp.makeConstraints { make in
+            make.top.horizontalEdges.equalToSuperview().inset(16)
+        }
+        
+        postImageView.snp.makeConstraints { make in
+            make.height.equalTo(250)
+            make.horizontalEdges.equalToSuperview()
+            make.top.equalTo(postTitleLabel.snp.bottom).offset(16)
+        }
+        
+        postTextLabel.snp.makeConstraints { make in
+            make.horizontalEdges.equalToSuperview().inset(16)
+            make.top.equalTo(postImageView.snp.bottom).offset(16)
+        }
+        
+        postLikesLabel.snp.makeConstraints { make in
+            make.top.equalTo(postTextLabel.snp.bottom).offset(16)
+            make.leading.equalToSuperview().offset(16)
+        }
+        
+        postViewLabel.snp.makeConstraints { make in
+            make.top.equalTo(postTextLabel.snp.bottom).offset(16)
+            make.trailing.bottom.equalToSuperview().offset(-16)
+        }
     }
+    
+    func processImage(named imageName: String) {
+            guard let sourceImage = UIImage(named: imageName) else {
+                print("Изображение \(imageName) не найдено")
+                return
+            }
+            
+            let imageProcessor = ImageProcessor() // Создаём экземпляр
+        let filter: ColorFilter = .colorInvert // Укажите нужный фильтр
+            
+            // Обработка изображения
+            imageProcessor.processImage(sourceImage: sourceImage, filter: filter) { [weak self] processedImage in
+                DispatchQueue.main.async {
+                    if let filteredImage = processedImage {
+                        self?.postImageView.image = filteredImage // Устанавливаем изображение
+                    } else {
+                        print("Ошибка обработки изображения")
+                    }
+                }
+            }
+        }
 }
