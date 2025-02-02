@@ -67,6 +67,8 @@ extension ProfileViewController: UITableViewDelegate {
         guard section == 0,
               let headerView = tableView.dequeueReusableHeaderFooterView(withIdentifier: "ProfileHeaderView") as? ProfileHeaderView else { return nil }
         
+        headerView.userData(user: viewModel.currentUser())
+        
         return headerView
     }
     

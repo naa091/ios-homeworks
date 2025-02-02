@@ -8,19 +8,31 @@
 import StorageService
 
 protocol LoginViewModeling {
-    func login()
+    func login(_ login: String) -> String?
 }
 
 final class LoginViewModel {
     private let userDefaultsService: UserDefaultsServicing
+    private let userService: UserServicing
     
-    init(userDefaultsService: UserDefaultsServicing) {
+    init(userDefaultsService: UserDefaultsServicing, userService: UserServicing) {
         self.userDefaultsService = userDefaultsService
+        self.userService = userService
     }
 }
 
 extension LoginViewModel: LoginViewModeling {
-    func login() {
-        userDefaultsService.setLoggedFlag(isLogIn: true)
+    func login(_ login: String) -> String? {
+        let result = userService.auth(login: login)
+        switch result {
+        case .success(let success):
+            print("success")
+            userDefaultsService.setLoggedFlag(isLogIn: true)
+            return nil
+        case .failure(let failure):
+            print("failure")
+            userDefaultsService.setLoggedFlag(isLogIn: false)
+            return failure.localizedDescription
+        }
     }
 }

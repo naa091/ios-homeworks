@@ -34,7 +34,7 @@ class LogInViewController: UIViewController {
     
     lazy var loginTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Email of phone"
+        textField.placeholder = "Login"
         textField.borderStyle = .none
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.black.cgColor
@@ -76,6 +76,15 @@ class LogInViewController: UIViewController {
         return button
     }()
     
+    lazy var errorLabel: UILabel = {
+        let label = UILabel()
+        label.text = "123"
+        label.textColor = .red
+        label.font = .systemFont(ofSize: 12, weight: .bold)
+        
+        return label
+    }()
+    
     init(viewModel: LoginViewModeling) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -96,7 +105,7 @@ private extension LogInViewController {
     func setupView() {
         view.addSubviews(views: [scrollView])
         scrollView.addSubviews(views: [contentView])
-        contentView.addSubviews(views: [logoImageView, loginTextField, passwordTextField, logInButton])
+        contentView.addSubviews(views: [logoImageView, loginTextField, passwordTextField, logInButton, errorLabel])
     }
     
     func setupConstraints() {
@@ -113,6 +122,11 @@ private extension LogInViewController {
             make.centerX.equalToSuperview()
             make.top.equalToSuperview().offset(120)
             make.height.width.equalTo(100)
+        }
+        
+        errorLabel.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.bottom.equalTo(loginTextField.snp.top).offset(-16)
         }
         
         loginTextField.snp.makeConstraints { make in
@@ -135,7 +149,15 @@ private extension LogInViewController {
     }
     
     @objc func logInButtonTapped() {
-        viewModel.login()
+        guard let loginText = loginTextField.text, !loginText.isEmpty else {
+            errorLabel.text = "Введите логин"
+            return
+        }
+        print("logInButtonTapped")
+        if let error = viewModel.login(loginText) {
+            print("\(error)")
+            errorLabel.text = error
+            self.view.setNeedsLayout()
+        }
     }
-    
 }

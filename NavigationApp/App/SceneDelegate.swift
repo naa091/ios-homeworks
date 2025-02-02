@@ -37,7 +37,8 @@ private extension SceneDelegate {
     }
     
     func showLoginViewController() {
-        let viewModel = LoginViewModel(userDefaultsService: storageService)
+        let userService = UserService(user: User(login: "123456", name: "Вася", avatar: UIImage(named: "Шкет")))
+        let viewModel = LoginViewModel(userDefaultsService: storageService, userService: userService)
         let loginViewController = LogInViewController(viewModel: viewModel)
         
         window?.rootViewController = loginViewController
@@ -48,7 +49,7 @@ private extension SceneDelegate {
         let feedNavigationController = UINavigationController(rootViewController: feedViewController)
         feedNavigationController.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "house.fill"), tag: 1)
                 
-        let profileViewModel = ProfileViewModel(userDefaultsService: storageService)
+        let profileViewModel = ProfileViewModel(userDefaultsService: storageService, user: User(login: "123456", name: "Вася", avatar: UIImage(named: "Шкет") ?? UIImage(systemName: "person.circle")))
         let profileViewController = ProfileViewController(viewModel: profileViewModel)
         let profileNavigationController = UINavigationController(rootViewController: profileViewController)
         profileNavigationController.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.fill"), tag: 2)
