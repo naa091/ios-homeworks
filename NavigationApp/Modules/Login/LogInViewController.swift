@@ -8,8 +8,12 @@
 import UIKit
 import SnapKit
 
+protocol LoginViewModelDelegate: AnyObject {
+    func didReciveErorMessage(_ message: String?)
+}
+
 class LogInViewController: UIViewController {
-    private let viewModel: LoginViewModeling
+    private var viewModel: LoginViewModeling
     
     lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -78,7 +82,6 @@ class LogInViewController: UIViewController {
     
     lazy var errorLabel: UILabel = {
         let label = UILabel()
-        label.text = "123"
         label.textColor = .red
         label.font = .systemFont(ofSize: 12, weight: .bold)
         
@@ -94,6 +97,12 @@ class LogInViewController: UIViewController {
     }
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        viewModel.delegate = self
+        print("✅ Делегат установлен в ViewController: \(viewModel.delegate != nil)")
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -149,15 +158,22 @@ private extension LogInViewController {
     }
     
     @objc func logInButtonTapped() {
-        guard let loginText = loginTextField.text, !loginText.isEmpty else {
-            errorLabel.text = "Введите логин"
-            return
-        }
+//        guard let loginText = loginTextField.text, !loginText.isEmpty else {
+//            errorLabel.text = "Введите логин"
+//            return
+//        }
         print("logInButtonTapped")
-        if let error = viewModel.login(loginText) {
-            print("\(error)")
-            errorLabel.text = error
-            self.view.setNeedsLayout()
+        viewModel.login(loginTextField.text ?? "")
+    }
+}
+
+extension LogInViewController: LoginViewModelDelegate {
+    func didReciveErorMessage(_ message: String?) {
+        DispatchQueue.main.async {
+            print("🔥 Ошибка получена в VC: \(message ?? "nil")") // Проверяем, передаётся ли сообщение
+//            self.errorLabel.text = nil // Убираем старый текст перед обновлением
+            self.errorLabel.text = message
+//            self.errorLabel.layoutIfNeeded()
         }
     }
 }

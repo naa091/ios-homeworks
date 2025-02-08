@@ -8,31 +8,40 @@
 import StorageService
 
 protocol LoginViewModeling {
-    func login(_ login: String) -> String?
+    var delegate: LoginViewModelDelegate? { get set }
+    func login(_ login: String)
 }
 
 final class LoginViewModel {
     private let userDefaultsService: UserDefaultsServicing
     private let userService: UserServicing
+    private let testUserService: TestUserServicing
+    weak var delegate: LoginViewModelDelegate?
     
     init(userDefaultsService: UserDefaultsServicing, userService: UserServicing) {
         self.userDefaultsService = userDefaultsService
         self.userService = userService
+        self.testUserService = TestUserService()
     }
 }
 
 extension LoginViewModel: LoginViewModeling {
-    func login(_ login: String) -> String? {
+    func login(_ login: String) {
+#if DEBUG
+        let result = testUserService.testAuth(login: login)
+#else
         let result = userService.auth(login: login)
+       
+#endif
+        
         switch result {
         case .success(let success):
-            print("success")
+            print("✅ Успешный вход")
             userDefaultsService.setLoggedFlag(isLogIn: true)
-            return nil
-        case .failure(let failure):
-            print("failure")
+        case .failure(let error):
+            print("🚨 Ошибка в ViewModel: \(error.localizedDescription)") // Проверяем ошибку
             userDefaultsService.setLoggedFlag(isLogIn: false)
-            return failure.localizedDescription
+            delegate?.didReciveErorMessage(error.localizedDescription)
         }
     }
 }

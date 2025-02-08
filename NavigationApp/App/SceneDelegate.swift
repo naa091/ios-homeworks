@@ -37,9 +37,16 @@ private extension SceneDelegate {
     }
     
     func showLoginViewController() {
+        if window?.rootViewController is LogInViewController {
+                print("🔄 Уже на экране логина, не пересоздаём")
+                return
+            }
+        
         let userService = UserService(user: User(login: "123456", name: "Вася", avatar: UIImage(named: "Шкет")))
         let viewModel = LoginViewModel(userDefaultsService: storageService, userService: userService)
         let loginViewController = LogInViewController(viewModel: viewModel)
+        viewModel.delegate = loginViewController
+        print("🔹 Создан новый VC, delegate: \(viewModel.delegate != nil)")
         
         window?.rootViewController = loginViewController
     }
