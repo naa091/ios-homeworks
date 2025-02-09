@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TestUserServicing {
-    func testAuth(login: String) -> Result<User, AuthError>
+    func testAuth(login: String, password: String) -> Result<User, AuthError>
 }

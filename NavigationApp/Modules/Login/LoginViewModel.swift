@@ -9,7 +9,7 @@ import StorageService
 
 protocol LoginViewModeling {
     var delegate: LoginViewModelDelegate? { get set }
-    func login(_ login: String)
+    func login(_ login: String, _ password: String)
 }
 
 final class LoginViewModel {
@@ -26,11 +26,11 @@ final class LoginViewModel {
 }
 
 extension LoginViewModel: LoginViewModeling {
-    func login(_ login: String) {
+    func login(_ login: String, _ password: String) {
 #if DEBUG
-        let result = testUserService.testAuth(login: login)
+        let result = testUserService.testAuth(login: login, password: password)
 #else
-        let result = userService.auth(login: login)
+        let result = userService.auth(login: login, password: password)
        
 #endif
         

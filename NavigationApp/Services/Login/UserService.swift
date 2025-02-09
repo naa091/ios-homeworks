@@ -16,8 +16,8 @@ final class UserService {
 }
 
 extension UserService: UserServicing {
-    func auth(login: String) -> Result<User, AuthError> {
-        guard user.login == login else { return .failure(.invalidLogin) }
+    func auth(login: String, password: String) -> Result<User, AuthError> {
+        guard user.login == login && user.password == password else { return .failure(.invalidLogin) }
         
         return .success(user)
     }

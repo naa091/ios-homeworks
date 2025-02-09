@@ -6,5 +6,5 @@
 //
 
 protocol UserServicing {
-    func auth(login: String) -> Result<User, AuthError>
+    func auth(login: String, password: String) -> Result<User, AuthError>
 }
