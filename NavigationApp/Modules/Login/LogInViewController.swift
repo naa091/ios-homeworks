@@ -8,8 +8,12 @@
 import UIKit
 import SnapKit
 
+protocol LoginViewModelDelegate: AnyObject {
+    func didReciveErorMessage(_ message: String?)
+}
+
 class LogInViewController: UIViewController {
-    private let viewModel: LoginViewModeling
+    private var viewModel: LoginViewModeling
     
     lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -34,7 +38,7 @@ class LogInViewController: UIViewController {
     
     lazy var loginTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "Email of phone"
+        textField.placeholder = "Login"
         textField.borderStyle = .none
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.black.cgColor
@@ -76,6 +80,14 @@ class LogInViewController: UIViewController {
         return button
     }()
     
+    lazy var errorLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .red
+        label.font = .systemFont(ofSize: 12, weight: .bold)
+        
+        return label
+    }()
+    
     init(viewModel: LoginViewModeling) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -85,6 +97,12 @@ class LogInViewController: UIViewController {
     }
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        viewModel.delegate = self
+        print("✅ Делегат установлен в ViewController: \(viewModel.delegate != nil)")
+    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -96,7 +114,7 @@ private extension LogInViewController {
     func setupView() {
         view.addSubviews(views: [scrollView])
         scrollView.addSubviews(views: [contentView])
-        contentView.addSubviews(views: [logoImageView, loginTextField, passwordTextField, logInButton])
+        contentView.addSubviews(views: [logoImageView, loginTextField, passwordTextField, logInButton, errorLabel])
     }
     
     func setupConstraints() {
@@ -113,6 +131,11 @@ private extension LogInViewController {
             make.centerX.equalToSuperview()
             make.top.equalToSuperview().offset(120)
             make.height.width.equalTo(100)
+        }
+        
+        errorLabel.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.bottom.equalTo(loginTextField.snp.top).offset(-16)
         }
         
         loginTextField.snp.makeConstraints { make in
@@ -135,7 +158,22 @@ private extension LogInViewController {
     }
     
     @objc func logInButtonTapped() {
-        viewModel.login()
+//        guard let loginText = loginTextField.text, !loginText.isEmpty else {
+//            errorLabel.text = "Введите логин"
+//            return
+//        }
+        print("logInButtonTapped")
+        viewModel.login(loginTextField.text ?? "")
     }
-    
+}
+
+extension LogInViewController: LoginViewModelDelegate {
+    func didReciveErorMessage(_ message: String?) {
+        DispatchQueue.main.async {
+            print("🔥 Ошибка получена в VC: \(message ?? "nil")") // Проверяем, передаётся ли сообщение
+//            self.errorLabel.text = nil // Убираем старый текст перед обновлением
+            self.errorLabel.text = message
+//            self.errorLabel.layoutIfNeeded()
+        }
+    }
 }
