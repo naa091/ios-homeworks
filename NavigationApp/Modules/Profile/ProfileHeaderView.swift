@@ -84,6 +84,11 @@ class ProfileHeaderView: UITableViewHeaderFooterView {
         super.layoutSubviews()
         avatarImageView.layer.cornerRadius = avatarImageView.bounds.width / 2
     }
+    
+    func userData(user: User) {
+        avatarImageView.image = user.avatar
+        fullNameLabel.text = user.name
+    }
 }
 
 private extension ProfileHeaderView {
