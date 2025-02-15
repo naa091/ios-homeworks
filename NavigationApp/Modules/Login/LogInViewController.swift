@@ -158,22 +158,25 @@ private extension LogInViewController {
     }
     
     @objc func logInButtonTapped() {
-//        guard let loginText = loginTextField.text, !loginText.isEmpty else {
-//            errorLabel.text = "Введите логин"
-//            return
-//        }
+        guard let loginText = loginTextField.text,
+              !loginText.isEmpty,
+              let passwordText = passwordTextField.text,
+              !passwordText.isEmpty else {
+            errorLabel.text = "Введите логин"
+            return
+        }
         print("logInButtonTapped")
-        viewModel.login(loginTextField.text ?? "")
+        viewModel.login(loginText, passwordText)
     }
 }
 
 extension LogInViewController: LoginViewModelDelegate {
     func didReciveErorMessage(_ message: String?) {
         DispatchQueue.main.async {
+            let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: .default))
+            self.present(alert, animated: true)
             print("🔥 Ошибка получена в VC: \(message ?? "nil")") // Проверяем, передаётся ли сообщение
-//            self.errorLabel.text = nil // Убираем старый текст перед обновлением
-            self.errorLabel.text = message
-//            self.errorLabel.layoutIfNeeded()
         }
     }
 }
