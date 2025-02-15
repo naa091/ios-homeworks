@@ -42,13 +42,9 @@ private extension SceneDelegate {
                 return
             }
         
-        let userService = UserService(user: User(login: "123456", name: "Вася", avatar: UIImage(named: "Шкет")))
-        let viewModel = LoginViewModel(userDefaultsService: storageService, userService: userService)
-        let loginViewController = LogInViewController(viewModel: viewModel)
-        viewModel.delegate = loginViewController
-        print("🔹 Создан новый VC, delegate: \(viewModel.delegate != nil)")
-        
-        window?.rootViewController = loginViewController
+        let user = User(login: "123456", name: "Вася", avatar: UIImage(named: "Шкет"))
+        let loginVC = LoginFactory.build(user: user, userDefaultService: storageService)
+        window?.rootViewController = loginVC
     }
     
     func showMainTabBarController() {
@@ -56,7 +52,7 @@ private extension SceneDelegate {
         let feedNavigationController = UINavigationController(rootViewController: feedViewController)
         feedNavigationController.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "house.fill"), tag: 1)
                 
-        let profileViewModel = ProfileViewModel(userDefaultsService: storageService, user: User(login: "123456", name: "Вася", avatar: UIImage(named: "Шкет") ?? UIImage(systemName: "person.circle")))
+        let profileViewModel = ProfileViewModel(userDefaultsService: storageService, user: User(login: "12345", name: "Вася", avatar: UIImage(named: "Шкет") ?? UIImage(systemName: "person.circle")))
         let profileViewController = ProfileViewController(viewModel: profileViewModel)
         let profileNavigationController = UINavigationController(rootViewController: profileViewController)
         profileNavigationController.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.fill"), tag: 2)
