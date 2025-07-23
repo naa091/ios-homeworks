@@ -11,6 +11,8 @@
 		090F80C82CFDB9EA005C18F2 /* StorageService.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 090F80BF2CFDB9EA005C18F2 /* StorageService.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		092F50CA2D4F6AF100A124DA /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 092F50C92D4F6AF100A124DA /* SnapKit */; };
 		09BD1B3C2D1ACAF700A97FFF /* iOSIntPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 09BD1B3B2D1ACAF700A97FFF /* iOSIntPackage */; };
+		78D7D8012E30D72000718516 /* iOSIntPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78D7D8002E30D72000718516 /* iOSIntPackage */; };
+		78D7D8042E30D74800718516 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 78D7D8032E30D74800718516 /* SnapKit */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +113,8 @@
 				092F50CA2D4F6AF100A124DA /* SnapKit in Frameworks */,
 				09BD1B3C2D1ACAF700A97FFF /* iOSIntPackage in Frameworks */,
 				090F80C72CFDB9EA005C18F2 /* StorageService.framework in Frameworks */,
+				78D7D8012E30D72000718516 /* iOSIntPackage in Frameworks */,
+				78D7D8042E30D74800718516 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,8 +232,8 @@
 			mainGroup = 095870FE2CBFC0AE009F2789;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				09BD1B3A2D1AC9E200A97FFF /* XCRemoteSwiftPackageReference "iOSIntPackage" */,
-				092F50C72D4F6AC200A124DA /* XCRemoteSwiftPackageReference "SnapKit" */,
+				78D7D7FF2E30D72000718516 /* XCRemoteSwiftPackageReference "iOSIntPackage" */,
+				78D7D8022E30D74800718516 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 095871082CBFC0AE009F2789 /* Products */;
@@ -379,6 +383,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.AleksandrNistratov.NavigationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -407,6 +415,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.AleksandrNistratov.NavigationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -577,8 +589,24 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/TrueMax/iOSIntPackage.git";
 			requirement = {
+				branch = imagepublisher;
+				kind = branch;
+			};
+		};
+		78D7D7FF2E30D72000718516 /* XCRemoteSwiftPackageReference "iOSIntPackage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TrueMax/iOSIntPackage";
+			requirement = {
+				branch = imagepublisher;
+				kind = branch;
+			};
+		};
+		78D7D8022E30D74800718516 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.0;
+				minimumVersion = 5.7.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -593,6 +621,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 09BD1B3A2D1AC9E200A97FFF /* XCRemoteSwiftPackageReference "iOSIntPackage" */;
 			productName = iOSIntPackage;
+		};
+		78D7D8002E30D72000718516 /* iOSIntPackage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78D7D7FF2E30D72000718516 /* XCRemoteSwiftPackageReference "iOSIntPackage" */;
+			productName = iOSIntPackage;
+		};
+		78D7D8032E30D74800718516 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78D7D8022E30D74800718516 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
