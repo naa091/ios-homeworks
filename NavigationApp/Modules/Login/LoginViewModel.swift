@@ -35,7 +35,7 @@ extension LoginViewModel: LoginViewModeling {
 #endif
         
         switch result {
-        case .success(let success):
+        case .success(_):
             print("✅ Успешный вход")
             userDefaultsService.setLoggedFlag(isLogIn: true)
         case .failure(let error):

@@ -8,7 +8,7 @@
 import UIKit
 import StorageService
 
-class ProfileViewController: UIViewController {
+final class ProfileViewController: UIViewController {
     private let viewModel: ProfileViewModeling
     let postData = PostData.getMockData(count: 10)
     
@@ -16,6 +16,7 @@ class ProfileViewController: UIViewController {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.register(PostTableViewCell.self, forCellReuseIdentifier: "PostTableViewCell")
         tableView.register(ProfileHeaderView.self, forHeaderFooterViewReuseIdentifier: "ProfileHeaderView")
+        tableView.register(PhotosTableViewCell.self, forCellReuseIdentifier: "PhotosTableViewCell")
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.delegate = self
         tableView.dataSource = self
@@ -44,7 +45,7 @@ private extension ProfileViewController {
         view.backgroundColor = .red
         view.addSubview(profileTableView)
     }
-   
+    
     func setupConstraints() {
         profileTableView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -93,8 +94,33 @@ extension ProfileViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PostTableViewCell", for: indexPath) as? PostTableViewCell else { return UITableViewCell() }
-        
-        return cell
+        switch indexPath.section {
+        case 0:
+            let cell = tableView.dequeueReusableCell(withIdentifier: "PhotosTableViewCell", for: indexPath) as! PhotosTableViewCell
+            return cell
+            
+        case 1:
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "PostTableViewCell", for: indexPath) as? PostTableViewCell else { return UITableViewCell() }
+            
+            return cell
+            
+        default:
+            assertionFailure("no registered section")
+            return UITableViewCell()
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        switch indexPath.section {
+        case 0:
+            tableView.deselectRow(at: indexPath, animated: false)
+            navigationController?.pushViewController(PhotosViewController(), animated: true)
+            
+        case 1:
+            tableView.deselectRow(at: indexPath, animated: false)
+            
+        default:
+            assertionFailure("no registered section")
+        }
     }
 }
