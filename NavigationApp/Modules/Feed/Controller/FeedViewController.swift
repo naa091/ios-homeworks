@@ -13,7 +13,7 @@ final class FeedViewController: UIViewController {
     private let feedView = FeedView()
 
     override func loadView() {
-        let rootView = FeedView()
+        let rootView = feedView
         rootView.onOpenPostTapped = { [weak self] in self?.openPostTapped() }
         rootView.onTestTapped = { [weak self] in self?.testTapped() }
         rootView.onCheckTapped = { [weak self] in self?.checkGuess() }

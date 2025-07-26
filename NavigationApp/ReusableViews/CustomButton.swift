@@ -24,17 +24,12 @@ final class CustomButton: UIButton {
     }
 
     func updateStyle(title: String?, titleColor: UIColor?, backgroundColor: UIColor?, cornerRadius: CGFloat?) {
-        if let title = title {
-            self.setTitle(title, for: .normal)
-        }
-        if let titleColor = titleColor {
-            self.setTitleColor(titleColor, for: .normal)
-        }
-        if let backgroundColor = backgroundColor {
+            setTitle(title, for: .normal)
+            setTitleColor(titleColor, for: .normal)
             self.backgroundColor = backgroundColor
+
+            if let cornerRadius {
+                self.layer.cornerRadius = cornerRadius
+            }
         }
-        if let cornerRadius = cornerRadius {
-            self.layer.cornerRadius = cornerRadius
-        }
-    }
 }
