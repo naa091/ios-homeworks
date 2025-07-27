@@ -21,10 +21,7 @@ class PostViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-#if DEBUG
-        view.backgroundColor = .red
-#else
-        view.backgroundColor = .green
-#endif
+        view.backgroundColor = customBackgroundColor
     }
+    
 }
