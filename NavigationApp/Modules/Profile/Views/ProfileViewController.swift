@@ -10,7 +10,10 @@ import StorageService
 
 final class ProfileViewController: UIViewController {
     private let viewModel: ProfileViewModeling
+    
     let postData = PostData.getMockData(count: 10)
+    
+    var coordinator: ProfileCoordinator?
     
     private lazy var profileTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
@@ -111,14 +114,14 @@ extension ProfileViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: false)
+        
         switch indexPath.section {
         case 0:
+            coordinator?.openPhotos()
             tableView.deselectRow(at: indexPath, animated: false)
-            navigationController?.pushViewController(PhotosViewController(), animated: true)
-            
         case 1:
             tableView.deselectRow(at: indexPath, animated: false)
-            
         default:
             assertionFailure("no registered section")
         }

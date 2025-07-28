@@ -9,12 +9,14 @@ import UIKit
 import SnapKit
 
 final class FeedViewController: UIViewController {
+    var coordinator: FeedCoordinator?
+    
     private let viewModel = FeedViewModel()
     private let feedView = FeedView()
     
     override func loadView() {
-        feedView.onOpenPostTapped = { [weak self] in self?.openPostTapped() }
-        feedView.onTestTapped = { [weak self] in self?.testTapped() }
+        feedView.onOpenPostTapped = { [weak self] in self?.coordinator?.openPost(withColor: .systemOrange) }
+        feedView.onTestTapped = { [weak self] in self?.coordinator?.openPost(withColor: .systemMint) }
         feedView.onCheckTapped = { [weak self] in self?.checkGuess() }
         self.view = feedView
     }
@@ -38,15 +40,5 @@ private extension FeedViewController {
 
     func checkGuess() {
         viewModel.checkGuess(word: feedView.textField.text)
-    }
-
-    func openPostTapped() {
-        let postVC = PostViewController(customBackgroundColor: .systemOrange)
-        navigationController?.pushViewController(postVC, animated: true)
-    }
-
-    func testTapped() {
-        let postVC = PostViewController(customBackgroundColor: .systemMint)
-        navigationController?.pushViewController(postVC, animated: true)
     }
 }
