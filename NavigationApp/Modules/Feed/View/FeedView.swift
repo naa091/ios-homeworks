@@ -34,7 +34,7 @@ final class FeedView: UIView {
     ) { [weak self] in
         self?.onOpenPostTapped?()
     }
-
+    
     private lazy var testButton = CustomButton(
         title: "Test button",
         titleColor: .white,
@@ -43,7 +43,7 @@ final class FeedView: UIView {
     ) { [weak self] in
         self?.onTestTapped?()
     }
-
+    
     private lazy var checkGuessButton = CustomButton(
         title: "Check",
         titleColor: .white,
@@ -51,7 +51,7 @@ final class FeedView: UIView {
     ) { [weak self] in
         self?.onCheckTapped?()
     }
-
+    
     // MARK: - Stack
     private lazy var verticalStackView: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [
@@ -65,7 +65,7 @@ final class FeedView: UIView {
         stack.spacing = 10
         return stack
     }()
-
+    
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -73,17 +73,19 @@ final class FeedView: UIView {
         setupConstraints()
         backgroundColor = .systemBackground
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+}
 
-    // MARK: - Setup
-    private func setupView() {
+//MARK: - Private extension
+private extension FeedView {
+    func setupView() {
         addSubview(verticalStackView)
     }
 
-    private func setupConstraints() {
+    func setupConstraints() {
         verticalStackView.snp.makeConstraints { make in
             make.centerY.equalToSuperview().offset(-50)
             make.leading.trailing.equalToSuperview().inset(24)
