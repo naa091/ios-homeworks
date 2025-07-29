@@ -80,6 +80,22 @@ class LogInViewController: UIViewController {
         return button
     }()
     
+    lazy var activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .medium)
+        indicator.hidesWhenStopped = true
+        return indicator
+    }()
+
+    lazy var bruteForceButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Подобрать пароль", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.backgroundColor = .systemRed
+        button.layer.cornerRadius = 10
+        button.addTarget(self, action: #selector(bruteForceTapped), for: .touchUpInside)
+        return button
+    }()
+    
     lazy var errorLabel: UILabel = {
         let label = UILabel()
         label.textColor = .red
@@ -114,7 +130,7 @@ private extension LogInViewController {
     func setupView() {
         view.addSubviews(views: [scrollView])
         scrollView.addSubviews(views: [contentView])
-        contentView.addSubviews(views: [logoImageView, loginTextField, passwordTextField, logInButton, errorLabel])
+        contentView.addSubviews(views: [logoImageView, loginTextField, passwordTextField, logInButton, errorLabel, bruteForceButton, activityIndicator])
     }
     
     func setupConstraints() {
@@ -155,6 +171,17 @@ private extension LogInViewController {
             make.leading.trailing.equalToSuperview().inset(16)
             make.top.equalTo(passwordTextField.snp.bottom).offset(16)
         }
+        
+        bruteForceButton.snp.makeConstraints { make in
+            make.top.equalTo(logInButton.snp.bottom).offset(16)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.height.equalTo(50)
+        }
+
+        activityIndicator.snp.makeConstraints { make in
+            make.centerY.equalTo(passwordTextField)
+            make.trailing.equalTo(passwordTextField.snp.trailing).inset(8)
+        }
     }
     
     @objc func logInButtonTapped() {
@@ -168,6 +195,30 @@ private extension LogInViewController {
         print("logInButtonTapped")
         viewModel.login(loginText, passwordText)
     }
+    
+    @objc func bruteForceTapped() {
+        let randomPassword = generateRandomPassword(length: 3)
+        print("🔐 Сгенерирован пароль: \(randomPassword)")
+
+        activityIndicator.startAnimating()
+        passwordTextField.text = ""
+        passwordTextField.isSecureTextEntry = true
+
+        let bruteForcer = PasswordBruteForcer()
+        bruteForcer.bruteForce(passwordToUnlock: randomPassword) { [weak self] foundPassword in
+            guard let self = self else { return }
+            self.activityIndicator.stopAnimating()
+            self.passwordTextField.isSecureTextEntry = false
+            self.passwordTextField.text = foundPassword
+            print("✅ Пароль найден: \(foundPassword)")
+        }
+    }
+
+    func generateRandomPassword(length: Int) -> String {
+        let characters = String().printable
+        return String((0..<length).compactMap { _ in characters.randomElement() })
+    }
+
 }
 
 extension LogInViewController: LoginViewModelDelegate {
