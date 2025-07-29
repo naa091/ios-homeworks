@@ -3,18 +3,16 @@ import iOSIntPackage
 
 final class PhotosViewController: UIViewController {
     // MARK: - Properties
-    
-    private let facade = ImagePublisherFacade()
-    private let timeInterval = 0.5
-    private let repeatCount = 16
-    
+
     private var images: [UIImage] = []
-    
+
     private let userImages: [UIImage] = {
         Images.allCases.compactMap {
             $0.image(name: $0).downsampled(maxDimension: 400)
         }
     }()
+    
+    private let imageProcessor = ImageProcessor()
     
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -38,24 +36,19 @@ final class PhotosViewController: UIViewController {
     }()
     
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
-        
         setupCollectionView()
         
-        facade.subscribe(self)
-        facade.addImagesWithTimer(time: timeInterval, repeat: repeatCount, userImages: userImages)
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        facade.removeSubscription(for: self)
+        // Обработка изображений
+        applyColorFiltersAndMeasurePerformance()
     }
 }
 
-//MARK: - Private methods
+// MARK: - Private methods
+
 private extension PhotosViewController {
     func setupCollectionView() {
         view.addSubview(collectionView)
@@ -66,17 +59,67 @@ private extension PhotosViewController {
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-}
-
-// MARK: - ImageLibrarySubscriber
-
-extension PhotosViewController: ImageLibrarySubscriber {
-    func receive(images: [UIImage]) {
-        self.images = images
-        DispatchQueue.main.async { [weak self] in
-            self?.collectionView.reloadData()
+    
+    private func applyColorFiltersAndMeasurePerformance() {
+        let filters: [ColorFilter] = [
+            .sepia(intensity: 0.8),
+            .monochrome(color: CIColor(red: 0.7, green: 0.7, blue: 0.7), intensity: 1.0),
+            .gaussianBlur(radius: 2.0)
+        ]
+        
+        let qosLevels: [DispatchQoS.QoSClass] = [.userInitiated, .utility, .background, .userInteractive, .unspecified, .default]
+        
+        for (index, qos) in qosLevels.enumerated() {
+            let selectedFilter = filters[index % filters.count]
+            let inputImages = userImages.shuffled()
+            
+            let startTime = CFAbsoluteTimeGetCurrent()
+            
+            processImages(
+                sourceImages: inputImages,
+                filter: selectedFilter,
+                qos: qos
+            ) { [weak self] processedImages in
+                let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
+                print("⏱️ QoS: \(qos) → \(timeElapsed) sec")
+                
+                DispatchQueue.main.async {
+                    self?.images = processedImages
+                    self?.collectionView.reloadData()
+                }
+            }
         }
     }
+
+    func processImages(
+        sourceImages: [UIImage],
+        filter: ColorFilter,
+        qos: DispatchQoS.QoSClass,
+        completion: @escaping ([UIImage]) -> Void
+    ) {
+        let imageProcessor = ImageProcessor()
+        let queue = DispatchQueue.global(qos: .background)
+        let group = DispatchGroup()
+
+        var processedImages: [UIImage?] = Array(repeating: nil, count: sourceImages.count)
+        
+        for (index, image) in sourceImages.enumerated() {
+            group.enter()
+            queue.async {
+                imageProcessor.processImage(sourceImage: image, filter: filter) { processedImage in
+                    processedImages[index] = processedImage
+                    group.leave()
+                }
+            }
+        }
+
+        group.notify(queue: .main) {
+            // Удаляем nil, если фильтрация не удалась
+            completion(processedImages.compactMap { $0 })
+        }
+    }
+
+
 }
 
 // MARK: - UICollectionViewDataSource
@@ -85,7 +128,7 @@ extension PhotosViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         images.count
     }
-    
+
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PhotoCollectionViewCell.identifier, for: indexPath) as? PhotoCollectionViewCell
@@ -96,3 +139,4 @@ extension PhotosViewController: UICollectionViewDataSource {
         return cell
     }
 }
+
