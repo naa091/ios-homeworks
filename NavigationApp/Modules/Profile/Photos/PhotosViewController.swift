@@ -1,6 +1,19 @@
 import UIKit
 import iOSIntPackage
 
+extension QualityOfService {
+    var qosLabel: String {
+        switch self {
+        case .userInteractive: return "userInteractive"
+        case .userInitiated:   return "userInitiated"
+        case .utility:         return "utility"
+        case .background:      return "background"
+        case .default:         return "default"
+        @unknown default:      return "unknown"
+        }
+    }
+}
+
 final class PhotosViewController: UIViewController {
     // MARK: - Properties
 
@@ -67,7 +80,13 @@ private extension PhotosViewController {
             .gaussianBlur(radius: 2.0)
         ]
         
-        let qosLevels: [DispatchQoS.QoSClass] = [.userInitiated, .utility, .background, .userInteractive, .unspecified, .default]
+        let qosLevels: [QualityOfService] = [
+            .userInitiated,
+            .utility,
+            .background,
+            .userInteractive,
+            .default
+        ]
         
         for (index, qos) in qosLevels.enumerated() {
             let selectedFilter = filters[index % filters.count]
@@ -81,43 +100,39 @@ private extension PhotosViewController {
                 qos: qos
             ) { [weak self] processedImages in
                 let timeElapsed = CFAbsoluteTimeGetCurrent() - startTime
-                print("⏱️ QoS: \(qos) → \(timeElapsed) sec")
+                print("⏱️ Simulated Queue Label: imageprocessing.\(qos.qosLabel) → \(String(format: "%.3f", timeElapsed)) sec")
                 
-                DispatchQueue.main.async {
-                    self?.images = processedImages
-                    self?.collectionView.reloadData()
-                }
+                self?.images = processedImages
+                self?.collectionView.reloadData()
             }
         }
     }
+
 
     func processImages(
         sourceImages: [UIImage],
         filter: ColorFilter,
-        qos: DispatchQoS.QoSClass,
+        qos: QualityOfService,
         completion: @escaping ([UIImage]) -> Void
     ) {
         let imageProcessor = ImageProcessor()
-        let queue = DispatchQueue.global(qos: .background)
-        let group = DispatchGroup()
 
-        var processedImages: [UIImage?] = Array(repeating: nil, count: sourceImages.count)
-        
-        for (index, image) in sourceImages.enumerated() {
-            group.enter()
-            queue.async {
-                imageProcessor.processImage(sourceImage: image, filter: filter) { processedImage in
-                    processedImages[index] = processedImage
-                    group.leave()
-                }
+        imageProcessor.processImagesOnThread(
+            sourceImages: sourceImages,
+            filter: filter,
+            qos: qos
+        ) { cgImages in
+            let uiImages = cgImages.compactMap { cgImage in
+                cgImage.map { UIImage(cgImage: $0) }
+            }
+
+            // Возвращаем результат в главном потоке
+            DispatchQueue.main.async {
+                completion(uiImages)
             }
         }
-
-        group.notify(queue: .main) {
-            // Удаляем nil, если фильтрация не удалась
-            completion(processedImages.compactMap { $0 })
-        }
     }
+
 
 
 }
