@@ -2,43 +2,30 @@ import UIKit
 import SnapKit
 
 protocol LoginViewModelDelegate: AnyObject {
-    func didReciveErorMessage(_ message: String?)
-}
-
-private enum LoginLockoutKeys {
-    static let failedAttempts = "loginFailedAttempts"
-    static let lockoutUntil = "loginLockoutUntil"
+    func didReceiveErrorMessage(_ message: String?)
+    func updateLockoutUI(remainingSeconds: Int)
+    func lockoutDidEnd()
 }
 
 class LogInViewController: UIViewController {
     private var viewModel: LoginViewModeling
-    private var lockoutTimer: Timer?
-    private var remainingLockoutSeconds: Int = 0
-    
-    // MARK: - UI элементы (без IBOutlet)
-    lazy var scrollView: UIScrollView = {
-        let scrollView = UIScrollView()
-        print("🌀 scrollView создан")
-        return scrollView
-    }()
-    
-    lazy var contentView: UIView = {
+
+    // MARK: - UI элементы
+    private lazy var scrollView = UIScrollView()
+    private lazy var contentView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
-        print("📄 contentView создан")
         return view
     }()
-    
-    lazy var logoImageView: UIImageView = {
+
+    private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "logo")
         imageView.contentMode = .scaleAspectFit
-        print("🖼 logoImageView создан")
         return imageView
     }()
-    
-    // Добавляем красный label для отображения блокировки
-    lazy var lockoutLabel: UILabel = {
+
+    private lazy var lockoutLabel: UILabel = {
         let label = UILabel()
         label.textColor = .systemRed
         label.font = .systemFont(ofSize: 14, weight: .bold)
@@ -46,289 +33,234 @@ class LogInViewController: UIViewController {
         label.isHidden = true
         return label
     }()
-    
-    lazy var loginTextField: UITextField = {
+
+    private lazy var loginTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Login"
-        textField.borderStyle = .none
-        textField.layer.borderWidth = 1
-        textField.layer.borderColor = UIColor.black.cgColor
-        textField.layer.cornerRadius = 10
-        textField.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
-        textField.leftViewMode = .always
-        textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
-        textField.rightViewMode = .always
-        print("⌨️ loginTextField создан")
+        textField.styleAsInput(topCorners: true)
         return textField
     }()
-    
-    lazy var passwordTextField: UITextField = {
+
+    private lazy var passwordTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Password"
         textField.isSecureTextEntry = true
-        textField.borderStyle = .none
-        textField.layer.borderWidth = 1
-        textField.layer.borderColor = UIColor.black.cgColor
-        textField.layer.cornerRadius = 10
-        textField.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
-        textField.leftViewMode = .always
-        textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
-        textField.rightViewMode = .always
-        print("🔒 passwordTextField создан")
+        textField.styleAsInput(topCorners: false)
         return textField
     }()
-    
-    lazy var logInButton: UIButton = {
+
+    private lazy var logInButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Log In", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .systemBlue
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(logInButtonTapped), for: .touchUpInside)
-        print("🔘 logInButton создан")
         return button
     }()
-    
-    lazy var activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .medium)
-        indicator.hidesWhenStopped = true
-        print("⏳ activityIndicator создан")
-        return indicator
-    }()
-    
-    lazy var bruteForceButton: UIButton = {
+
+    private lazy var activityIndicator = UIActivityIndicatorView(style: .medium)
+
+    private lazy var bruteForceButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Подобрать пароль", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .systemRed
         button.layer.cornerRadius = 10
         button.addTarget(self, action: #selector(bruteForceTapped), for: .touchUpInside)
-        print("🔐 bruteForceButton создан")
         return button
     }()
-    
-    lazy var errorLabel: UILabel = {
+
+    private lazy var errorLabel: UILabel = {
         let label = UILabel()
         label.textColor = .red
         label.font = .systemFont(ofSize: 12, weight: .bold)
-        print("❗️ errorLabel создан")
+        label.textAlignment = .center
         return label
     }()
-    
+
     // MARK: - Инициализация
     init(viewModel: LoginViewModeling) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        print("🚀 LogInViewController init")
-        setupView()
-        setupConstraints()
+        self.viewModel.delegate = self
     }
-    
+
     required init?(coder: NSCoder) { fatalError("init(coder:) не реализован") }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        print("✅ viewDidLoad вызван")
-        viewModel.delegate = self
-        checkLockoutStatus()
+        setupView()
+        setupConstraints()
+        viewModel.checkLockoutStatus()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = true
-        print("👀 viewWillAppear вызван, navigationBar скрыт")
     }
-}
 
-//MARK: -  Private EXT
-private extension LogInViewController {
-
-    // MARK: - Настройка UI
+    // MARK: - UI Setup
 
     private func setupView() {
         view.backgroundColor = .white
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
+
         contentView.addSubviews(views: [
             logoImageView,
             lockoutLabel,
             loginTextField,
             passwordTextField,
             logInButton,
-            errorLabel,
             bruteForceButton,
+            errorLabel,
             activityIndicator
         ])
-        print("🛠 setupView выполнен, все вью добавлены")
     }
 
-    func setupConstraints() {
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide)
-        }
-        contentView.snp.makeConstraints { make in
-            make.edges.equalTo(view)
-        }
-        logoImageView.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalToSuperview().offset(120)
-            make.height.width.equalTo(100)
+    private func setupConstraints() {
+        scrollView.snp.makeConstraints { $0.edges.equalTo(view.safeAreaLayoutGuide) }
+        contentView.snp.makeConstraints { $0.edges.equalTo(view) }
+
+        logoImageView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.top.equalToSuperview().offset(120)
+            $0.height.width.equalTo(100)
         }
 
-        lockoutLabel.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.bottom.equalTo(loginTextField.snp.top).offset(-8)
-            make.height.equalTo(20)
+        lockoutLabel.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.bottom.equalTo(loginTextField.snp.top).offset(-8)
+            $0.height.equalTo(20)
         }
 
-        errorLabel.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.bottom.equalTo(lockoutLabel.snp.top).offset(-4)
+        errorLabel.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(lockoutLabel.snp.top).offset(-4)
         }
 
-        loginTextField.snp.makeConstraints { make in
-            make.height.equalTo(50)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.top.equalTo(logoImageView.snp.bottom).offset(120)
+        loginTextField.snp.makeConstraints {
+            $0.top.equalTo(logoImageView.snp.bottom).offset(120)
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(50)
         }
-        passwordTextField.snp.makeConstraints { make in
-            make.height.equalTo(50)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.top.equalTo(loginTextField.snp.bottom).offset(1)
-        }
-        logInButton.snp.makeConstraints { make in
-            make.height.equalTo(50)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.top.equalTo(passwordTextField.snp.bottom).offset(16)
-        }
-        bruteForceButton.snp.makeConstraints { make in
-            make.top.equalTo(logInButton.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.height.equalTo(50)
-        }
-        activityIndicator.snp.makeConstraints { make in
-            make.centerY.equalTo(passwordTextField)
-            make.trailing.equalTo(passwordTextField.snp.trailing).inset(8)
-        }
-        print("📐 setupConstraints выполнен")
-    }
 
-    // MARK: - Логика блокировки
+        passwordTextField.snp.makeConstraints {
+            $0.top.equalTo(loginTextField.snp.bottom).offset(1)
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(50)
+        }
 
-    func checkLockoutStatus() {
-        print("🕵️ Проверяем статус блокировки")
+        logInButton.snp.makeConstraints {
+            $0.top.equalTo(passwordTextField.snp.bottom).offset(16)
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(50)
+        }
 
-        if let lockoutUntil = UserDefaults.standard.object(forKey: LoginLockoutKeys.lockoutUntil) as? Date {
-            let remaining = Int(lockoutUntil.timeIntervalSinceNow)
-            if remaining > 0 {
-                print("⏰ Осталось блокировки: \(remaining) секунд")
-                startLockoutTimer(seconds: remaining)
-            } else {
-                clearLockout()
-            }
-        } else {
-            print("✅ Нет активной блокировки")
-            clearLockout()
+        bruteForceButton.snp.makeConstraints {
+            $0.top.equalTo(logInButton.snp.bottom).offset(16)
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(50)
+        }
+
+        activityIndicator.snp.makeConstraints {
+            $0.centerY.equalTo(passwordTextField)
+            $0.trailing.equalTo(passwordTextField.snp.trailing).inset(8)
         }
     }
 
-    func startLockoutTimer(seconds: Int = 30) {
-        print("🔐 Стартуем блокировку на \(seconds) секунд")
+    // MARK: - Actions
 
-        remainingLockoutSeconds = seconds
-        updateLockoutUI()
-        logInButton.isEnabled = false
-        lockoutLabel.isHidden = false
-
-        lockoutTimer?.invalidate()
-        lockoutTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
-            guard let self = self else { return }
-            self.remainingLockoutSeconds -= 1
-            if self.remainingLockoutSeconds > 0 {
-                self.updateLockoutUI()
-            } else {
-                timer.invalidate()
-                self.clearLockout()
-            }
+    @objc private func logInButtonTapped() {
+        do {
+            let login = try validateLogin()
+            let password = try validatePassword()
+            viewModel.login(login, password)
+        } catch {
+            showAlert(with: error.localizedDescription)
         }
     }
 
-    func updateLockoutUI() {
-        lockoutLabel.text = "Попытки закончились, ждите \(remainingLockoutSeconds) сек."
-        logInButton.setTitle("Вход заблокирован", for: .normal)
-    }
-
-    func clearLockout() {
-        print("♻️ Сбрасываем блокировку и счётчик")
-        UserDefaults.standard.set(0, forKey: LoginLockoutKeys.failedAttempts)
-        UserDefaults.standard.removeObject(forKey: LoginLockoutKeys.lockoutUntil)
-        logInButton.isEnabled = true
-        logInButton.setTitle("Log In", for: .normal)
-        lockoutLabel.isHidden = true
-    }
-
-    // MARK: - Действия кнопок
-
-    @objc func logInButtonTapped() {
-        print("🔘 Кнопка LogIn нажата")
-
-        guard let login = loginTextField.text, !login.isEmpty,
-              let password = passwordTextField.text, !password.isEmpty else {
-            print("⚠️ Логин или пароль пусты")
-            errorLabel.text = "Введите логин"
-            return
-        }
-
-        print("📥 Логин: \(login), Пароль: \(password)")
-        viewModel.login(login, password)
-    }
-
-    @objc func bruteForceTapped() {
-        print("🔐 Нажата кнопка bruteForce")
-
+    @objc private func bruteForceTapped() {
         let randomPassword = generateRandomPassword(length: 3)
-        print("🔑 Сгенерирован пароль: \(randomPassword)")
-
         activityIndicator.startAnimating()
         passwordTextField.text = ""
-        passwordTextField.isSecureTextEntry = true
 
         let bruteForcer = PasswordBruteForcer()
         bruteForcer.bruteForce(passwordToUnlock: randomPassword) { [weak self] foundPassword in
             guard let self = self else { return }
-            self.activityIndicator.stopAnimating()
-            self.passwordTextField.isSecureTextEntry = false
-            self.passwordTextField.text = foundPassword
-            print("✅ Пароль найден: \(foundPassword)")
+            DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
+                self.passwordTextField.isSecureTextEntry = false
+                self.passwordTextField.text = foundPassword
+            }
         }
     }
 
-    func generateRandomPassword(length: Int) -> String {
+    // MARK: - Helpers
+
+    private func validateLogin() throws -> String {
+        guard let login = loginTextField.text, !login.isEmpty else {
+            throw LoginError.emptyLogin
+        }
+        return login
+    }
+
+    private func validatePassword() throws -> String {
+        guard let password = passwordTextField.text, !password.isEmpty else {
+            throw LoginError.emptyPassword
+        }
+        return password
+    }
+
+    private func generateRandomPassword(length: Int) -> String {
         let characters = String().printable
         return String((0..<length).compactMap { _ in characters.randomElement() })
+    }
+
+    private func showAlert(with message: String) {
+        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ок", style: .default))
+        present(alert, animated: true)
     }
 }
 
 // MARK: - LoginViewModelDelegate
 
 extension LogInViewController: LoginViewModelDelegate {
-    func didReciveErorMessage(_ message: String?) {
-        print("❌ didReciveErorMessage вызвано с сообщением: \(message ?? "nil")")
+    func didReceiveErrorMessage(_ message: String?) {
+        errorLabel.text = message
+    }
 
-        DispatchQueue.main.async {
-            self.errorLabel.text = message
+    func updateLockoutUI(remainingSeconds: Int) {
+        lockoutLabel.text = "Попытки закончились, ждите \(remainingSeconds) сек."
+        lockoutLabel.isHidden = false
+        logInButton.setTitle("Вход заблокирован", for: .normal)
+        logInButton.isEnabled = false
+    }
 
-            var attempts = UserDefaults.standard.integer(forKey: LoginLockoutKeys.failedAttempts)
-            attempts += 1
-            UserDefaults.standard.set(attempts, forKey: LoginLockoutKeys.failedAttempts)
+    func lockoutDidEnd() {
+        logInButton.setTitle("Log In", for: .normal)
+        logInButton.isEnabled = true
+        lockoutLabel.isHidden = true
+    }
+}
 
-            if attempts >= 3 {
-                print("🚫 Превышено число попыток. Стартуем таймер блокировки.")
-                self.startLockoutTimer()
-            }
-        }
+// MARK: - Custom TextField Styling
+
+private extension UITextField {
+    func styleAsInput(topCorners: Bool) {
+        borderStyle = .none
+        layer.borderWidth = 1
+        layer.borderColor = UIColor.black.cgColor
+        layer.cornerRadius = 10
+        layer.maskedCorners = topCorners ? [.layerMinXMinYCorner, .layerMaxXMinYCorner] : [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+
+        leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
+        leftViewMode = .always
+        rightView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
+        rightViewMode = .always
     }
 }
 
