@@ -9,7 +9,7 @@ protocol LoginViewModelDelegate: AnyObject {
 
 class LogInViewController: UIViewController {
     private var viewModel: LoginViewModeling
-
+    
     // MARK: - UI элементы
     private lazy var scrollView = UIScrollView()
     private lazy var contentView: UIView = {
@@ -17,14 +17,14 @@ class LogInViewController: UIViewController {
         view.backgroundColor = .white
         return view
     }()
-
+    
     private lazy var logoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "logo")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
-
+    
     private lazy var lockoutLabel: UILabel = {
         let label = UILabel()
         label.textColor = .systemRed
@@ -33,14 +33,14 @@ class LogInViewController: UIViewController {
         label.isHidden = true
         return label
     }()
-
+    
     private lazy var loginTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Login"
         textField.styleAsInput(topCorners: true)
         return textField
     }()
-
+    
     private lazy var passwordTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "Password"
@@ -48,7 +48,7 @@ class LogInViewController: UIViewController {
         textField.styleAsInput(topCorners: false)
         return textField
     }()
-
+    
     private lazy var logInButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Log In", for: .normal)
@@ -58,9 +58,9 @@ class LogInViewController: UIViewController {
         button.addTarget(self, action: #selector(logInButtonTapped), for: .touchUpInside)
         return button
     }()
-
+    
     private lazy var activityIndicator = UIActivityIndicatorView(style: .medium)
-
+    
     private lazy var bruteForceButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("Подобрать пароль", for: .normal)
@@ -70,7 +70,7 @@ class LogInViewController: UIViewController {
         button.addTarget(self, action: #selector(bruteForceTapped), for: .touchUpInside)
         return button
     }()
-
+    
     private lazy var errorLabel: UILabel = {
         let label = UILabel()
         label.textColor = .red
@@ -78,31 +78,31 @@ class LogInViewController: UIViewController {
         label.textAlignment = .center
         return label
     }()
-
+    
     // MARK: - Инициализация
     init(viewModel: LoginViewModeling) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
         self.viewModel.delegate = self
     }
-
+    
     required init?(coder: NSCoder) { fatalError("init(coder:) не реализован") }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
         setupConstraints()
         viewModel.checkLockoutStatus()
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = true
     }
-
+}
     // MARK: - UI Setup
-
-    private func setupView() {
+private extension LogInViewController {
+    func setupView() {
         view.backgroundColor = .white
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)
@@ -119,7 +119,7 @@ class LogInViewController: UIViewController {
         ])
     }
 
-    private func setupConstraints() {
+    func setupConstraints() {
         scrollView.snp.makeConstraints { $0.edges.equalTo(view.safeAreaLayoutGuide) }
         contentView.snp.makeConstraints { $0.edges.equalTo(view) }
 
@@ -172,17 +172,13 @@ class LogInViewController: UIViewController {
 
     // MARK: - Actions
 
-    @objc private func logInButtonTapped() {
-        do {
-            let login = try validateLogin()
-            let password = try validatePassword()
-            viewModel.login(login, password)
-        } catch {
-            showAlert(with: error.localizedDescription)
-        }
+    @objc func logInButtonTapped() {
+        let login = loginTextField.text ?? ""
+        let password = passwordTextField.text ?? ""
+        viewModel.login(login, password)
     }
 
-    @objc private func bruteForceTapped() {
+    @objc func bruteForceTapped() {
         let randomPassword = generateRandomPassword(length: 3)
         activityIndicator.startAnimating()
         passwordTextField.text = ""
@@ -200,26 +196,12 @@ class LogInViewController: UIViewController {
 
     // MARK: - Helpers
 
-    private func validateLogin() throws -> String {
-        guard let login = loginTextField.text, !login.isEmpty else {
-            throw LoginError.emptyLogin
-        }
-        return login
-    }
-
-    private func validatePassword() throws -> String {
-        guard let password = passwordTextField.text, !password.isEmpty else {
-            throw LoginError.emptyPassword
-        }
-        return password
-    }
-
-    private func generateRandomPassword(length: Int) -> String {
+    func generateRandomPassword(length: Int) -> String {
         let characters = String().printable
         return String((0..<length).compactMap { _ in characters.randomElement() })
     }
 
-    private func showAlert(with message: String) {
+    func showAlert(with message: String) {
         let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Ок", style: .default))
         present(alert, animated: true)
