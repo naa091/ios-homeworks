@@ -11,7 +11,7 @@ enum AuthError: Error {
     var localizedDescription: String {
         switch self {
         case .invalidLogin:
-            return "Invalid login"
+            return "Invalid login or password"
         }
     }
 }
