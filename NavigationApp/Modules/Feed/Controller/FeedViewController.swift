@@ -18,6 +18,8 @@ final class FeedViewController: UIViewController {
         feedView.onOpenPostTapped = { [weak self] in self?.coordinator?.openPost(withColor: .systemOrange) }
         feedView.onTestTapped = { [weak self] in self?.coordinator?.openPost(withColor: .systemMint) }
         feedView.onCheckTapped = { [weak self] in self?.checkGuess() }
+        feedView.onAudioPlayerTapped = { [weak self] in self?.coordinator?.openAudioPlayer() }
+
         self.view = feedView
     }
     

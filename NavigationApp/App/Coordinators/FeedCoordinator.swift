@@ -19,4 +19,10 @@ final class FeedCoordinator: Coordinator {
         let postVC = PostViewController(customBackgroundColor: color)
         navigationController.pushViewController(postVC, animated: true)
     }
+    
+    func openAudioPlayer() {
+        let audioVC = AudioPlayerViewController()
+        navigationController.pushViewController(audioVC, animated: true)
+    }
+
 }
