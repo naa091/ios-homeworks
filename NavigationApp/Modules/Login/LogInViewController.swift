@@ -212,8 +212,19 @@ private extension LogInViewController {
 
 extension LogInViewController: LoginViewModelDelegate {
     func didReceiveErrorMessage(_ message: String?) {
-        errorLabel.text = message
+        guard let message = message else {
+            errorLabel.text = nil
+            return
+        }
+
+        if message.contains("Попытки закончились") {
+            errorLabel.text = message
+        } else {
+            showAlert(with: message)
+        }
     }
+
+
 
     func updateLockoutUI(remainingSeconds: Int) {
         lockoutLabel.text = "Попытки закончились, ждите \(remainingSeconds) сек."
