@@ -24,8 +24,18 @@ final class FeedView: UIView {
     var onOpenPostTapped: (() -> Void)?
     var onTestTapped: (() -> Void)?
     var onCheckTapped: (() -> Void)?
+    var onAudioPlayerTapped: (() -> Void)?
     
     // MARK: - Buttons
+    private lazy var audioPlayerButton = CustomButton(
+        title: "Audio Player",
+        titleColor: .white,
+        backgroundColor: .darkGray,
+        cornerRadius: 10
+    ) { [weak self] in
+        self?.onAudioPlayerTapped?()
+    }
+
     private lazy var openPostButton = CustomButton(
         title: "Open post",
         titleColor: .white,
@@ -59,13 +69,14 @@ final class FeedView: UIView {
             testButton,
             textField,
             checkGuessButton,
-            resultLabel
+            resultLabel,
+            audioPlayerButton
         ])
         stack.axis = .vertical
         stack.spacing = 10
         return stack
     }()
-    
+
     // MARK: - Init
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -97,5 +108,7 @@ private extension FeedView {
 
         textField.snp.makeConstraints { $0.height.equalTo(44) }
         resultLabel.snp.makeConstraints { $0.height.equalTo(30) }
+        audioPlayerButton.snp.makeConstraints { $0.height.equalTo(50) }
+
     }
 }
