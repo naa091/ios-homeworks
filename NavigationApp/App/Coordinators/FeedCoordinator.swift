@@ -25,4 +25,9 @@ final class FeedCoordinator: Coordinator {
         navigationController.pushViewController(audioVC, animated: true)
     }
 
+    func openInfo() {
+        let infoVC = InfoViewController()
+        navigationController.pushViewController(infoVC, animated: true)
+    }
+
 }

@@ -19,7 +19,7 @@ final class FeedViewController: UIViewController {
         feedView.onTestTapped = { [weak self] in self?.coordinator?.openPost(withColor: .systemMint) }
         feedView.onCheckTapped = { [weak self] in self?.checkGuess() }
         feedView.onAudioPlayerTapped = { [weak self] in self?.coordinator?.openAudioPlayer() }
-
+        feedView.onInfoTapped = { [weak self] in self?.coordinator?.openInfo() }
         self.view = feedView
     }
     
