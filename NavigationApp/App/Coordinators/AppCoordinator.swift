@@ -1,107 +1,82 @@
 import UIKit
-import StorageService
+import FirebaseAuth
+
+extension Notification.Name {
+    static let didLogin = Notification.Name("didLogin")
+    static let didLogout = Notification.Name("didLogout")
+}
 
 final class AppCoordinator: Coordinator {
-    // MARK: - Properties
-    
     var childCoordinators: [Coordinator] = []
-    
+
     private let window: UIWindow
     private let storageService: UserDefaultsService
     private var tabBarController: UITabBarController?
-    
-    // Храним экземпляр LogInViewController, чтобы не создавать заново
-    private var loginViewController: LogInViewController?
-    
-    // MARK: - Init
-    
+    private var loginViewController: UIViewController?
+
     init(window: UIWindow, storageService: UserDefaultsService) {
         self.window = window
         self.storageService = storageService
-        
-        self.storageService.onLoginStatusChahged = { [weak self] in
-            print("🔄 onLoginStatusChahged вызван")
+
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLoginStatusChange), name: .didLogin, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleLoginStatusChange), name: .didLogout, object: nil)
+
+        Auth.auth().addStateDidChangeListener { [weak self] _, user in
             self?.handleLoginStatusChange()
         }
     }
-    
-    // MARK: - Public
-    
+
     func start() {
-        if storageService.getIsLoggedFlag() {
+        if storageService.getIsLoggedFlag(), Auth.auth().currentUser != nil {
             showMainInterface()
         } else {
             showLogin()
         }
     }
-}
 
-// MARK: - Private EXT
-
-private extension AppCoordinator {
-    func handleLoginStatusChange() {
+    @objc private func handleLoginStatusChange() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            if self.storageService.getIsLoggedFlag() {
-                print("👤 Пользователь залогинен, показываем главный интерфейс")
+            if Auth.auth().currentUser != nil {
+                self.storageService.setIsLoggedFlag(true)
                 self.showMainInterface()
             } else {
-                print("🚪 Пользователь не залогинен, показываем экран логина")
+                self.storageService.setIsLoggedFlag(false)
                 self.showLogin()
             }
         }
     }
-    
-    func showLogin() {
+
+    private func showLogin() {
         childCoordinators.removeAll()
-        
-        if let loginVC = loginViewController {
-            // Если контроллер уже создан, просто показываем его заново
-            print("♻️ Показываем существующий LoginViewController")
-            window.rootViewController = loginVC
+        if let vc = loginViewController {
+            window.rootViewController = vc
             window.makeKeyAndVisible()
         } else {
-            print("🆕 Создаём новый LoginViewController")
-            let user = User(login: "123456", name: "Вася", avatar: UIImage(named: "Шкет"))
-            let loginVC = LoginFactory.build(user: user, userDefaultService: storageService)
+            let loginVC = LoginFactory.build(userDefaultService: storageService)
             loginViewController = loginVC
             window.rootViewController = loginVC
             window.makeKeyAndVisible()
         }
     }
-    
-    func showMainInterface() {
+
+    private func showMainInterface() {
         let tabBarController = UITabBarController()
         self.tabBarController = tabBarController
-
         childCoordinators.removeAll()
-        
-        // MARK: Feed
+
         let feedNavController = UINavigationController()
         let feedCoordinator = FeedCoordinator(navigationController: feedNavController)
         addChild(feedCoordinator)
         feedCoordinator.start()
-        feedNavController.tabBarItem = UITabBarItem(
-            title: "Feed",
-            image: UIImage(systemName: "house.fill"),
-            tag: 0
-        )
+        feedNavController.tabBarItem = UITabBarItem(title: "Feed", image: UIImage(systemName: "house.fill"), tag: 0)
 
-        // MARK: Profile
         let profileNavController = UINavigationController()
-        let profileCoordinator = ProfileCoordinator(
-            navigationController: profileNavController,
-            storageService: storageService
-        )
+        let profileCoordinator = ProfileCoordinator(navigationController: profileNavController, storageService: storageService)
         addChild(profileCoordinator)
         profileCoordinator.start()
-        profileNavController.tabBarItem = UITabBarItem(
-            title: "Profile",
-            image: UIImage(systemName: "person.fill"),
-            tag: 1
-        )
+        profileNavController.tabBarItem = UITabBarItem(title: "Profile", image: UIImage(systemName: "person.fill"), tag: 1)
 
-        // MARK: Setup tabBar
         tabBarController.viewControllers = [feedNavController, profileNavController]
         tabBarController.tabBar.tintColor = .blue
         tabBarController.tabBar.unselectedItemTintColor = .gray
@@ -110,3 +85,4 @@ private extension AppCoordinator {
         window.makeKeyAndVisible()
     }
 }
+

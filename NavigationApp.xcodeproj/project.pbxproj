@@ -13,6 +13,8 @@
 		09BD1B3C2D1ACAF700A97FFF /* iOSIntPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 09BD1B3B2D1ACAF700A97FFF /* iOSIntPackage */; };
 		78D7D8012E30D72000718516 /* iOSIntPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78D7D8002E30D72000718516 /* iOSIntPackage */; };
 		78D7D8042E30D74800718516 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 78D7D8032E30D74800718516 /* SnapKit */; };
+		78E59BD52E429E5600F3C3D9 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 78E59BD42E429E5600F3C3D9 /* FirebaseCore */; };
+		78E59BD72E429E9D00F3C3D9 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 78E59BD62E429E9D00F3C3D9 /* FirebaseAuth */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,6 +116,8 @@
 				09BD1B3C2D1ACAF700A97FFF /* iOSIntPackage in Frameworks */,
 				090F80C72CFDB9EA005C18F2 /* StorageService.framework in Frameworks */,
 				78D7D8012E30D72000718516 /* iOSIntPackage in Frameworks */,
+				78E59BD52E429E5600F3C3D9 /* FirebaseCore in Frameworks */,
+				78E59BD72E429E9D00F3C3D9 /* FirebaseAuth in Frameworks */,
 				78D7D8042E30D74800718516 /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -234,6 +238,7 @@
 			packageReferences = (
 				78D7D7FF2E30D72000718516 /* XCRemoteSwiftPackageReference "iOSIntPackage" */,
 				78D7D8022E30D74800718516 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				78E59BD12E429D3800F3C3D9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 095871082CBFC0AE009F2789 /* Products */;
@@ -368,7 +373,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = P2W83Z8LVL;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NavigationApp/SupportingFiles/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -381,6 +386,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.AleksandrNistratov.NavigationApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -400,7 +406,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = P2W83Z8LVL;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NavigationApp/SupportingFiles/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -609,6 +615,14 @@
 				minimumVersion = 5.7.1;
 			};
 		};
+		78E59BD12E429D3800F3C3D9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -631,6 +645,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 78D7D8022E30D74800718516 /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		78E59BD42E429E5600F3C3D9 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78E59BD12E429D3800F3C3D9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		78E59BD62E429E9D00F3C3D9 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 78E59BD12E429D3800F3C3D9 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

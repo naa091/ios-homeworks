@@ -1,19 +1,11 @@
-//
-//  LoginFactory.swift
-//  NavigationApp
-//
-//  Created by Александр Нистратов on 15.02.2025.
-//
-
-import StorageService
+import UIKit
 
 final class LoginFactory {
-    static func build(user: User, userDefaultService: UserDefaultsServicing) -> LogInViewController {
-        let userService = UserService(user: user)
-        let viewModel = LoginViewModel(userDefaultsService: userDefaultService, userService: userService)
+    static func build(userDefaultService: UserDefaultsService) -> UIViewController {
+        let checker = CheckerService()
+        let viewModel = LoginViewModel(checkerService: checker)
         let loginVC = LogInViewController(viewModel: viewModel)
-        viewModel.delegate = loginVC
-        
         return loginVC
     }
 }
+

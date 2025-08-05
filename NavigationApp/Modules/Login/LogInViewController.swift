@@ -1,259 +1,217 @@
 import UIKit
 import SnapKit
 
-protocol LoginViewModelDelegate: AnyObject {
-    func didReceiveErrorMessage(_ message: String?)
-    func updateLockoutUI(remainingSeconds: Int)
-    func lockoutDidEnd()
-}
+final class LogInViewController: UIViewController {
+    private let viewModel: LoginViewModeling
 
-class LogInViewController: UIViewController {
-    private var viewModel: LoginViewModeling
-    
-    // MARK: - UI элементы
-    private lazy var scrollView = UIScrollView()
-    private lazy var contentView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        return view
+    // MARK: - UI
+    private lazy var emailField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Email"
+        tf.autocapitalizationType = .none
+        tf.keyboardType = .emailAddress
+        tf.layer.borderWidth = 1
+        tf.layer.cornerRadius = 8
+        tf.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 44))
+        tf.leftViewMode = .always
+        return tf
     }()
-    
-    private lazy var logoImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(named: "logo")
-        imageView.contentMode = .scaleAspectFit
-        return imageView
+
+    private lazy var passwordField: UITextField = {
+        let tf = UITextField()
+        tf.placeholder = "Password"
+        tf.isSecureTextEntry = true
+        tf.layer.borderWidth = 1
+        tf.layer.cornerRadius = 8
+        tf.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 44))
+        tf.leftViewMode = .always
+        return tf
     }()
-    
-    private lazy var lockoutLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .systemRed
-        label.font = .systemFont(ofSize: 14, weight: .bold)
-        label.textAlignment = .center
-        label.isHidden = true
-        return label
+
+    private lazy var loginButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.setTitle("Login", for: .normal)
+        b.layer.cornerRadius = 8
+        b.backgroundColor = .systemBlue
+        b.setTitleColor(.white, for: .normal)
+        b.isEnabled = false
+        b.alpha = 0.5
+        b.addTarget(self, action: #selector(loginTapped), for: .touchUpInside)
+        return b
     }()
-    
-    private lazy var loginTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "Login"
-        textField.styleAsInput(topCorners: true)
-        return textField
+
+    private lazy var registerButton: UIButton = {
+        let b = UIButton(type: .system)
+        b.setTitle("Register", for: .normal)
+        b.layer.cornerRadius = 8
+        b.backgroundColor = .systemGreen
+        b.setTitleColor(.white, for: .normal)
+        b.isEnabled = false
+        b.alpha = 0.5
+        b.addTarget(self, action: #selector(registerTapped), for: .touchUpInside)
+        return b
     }()
-    
-    private lazy var passwordTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "Password"
-        textField.isSecureTextEntry = true
-        textField.styleAsInput(topCorners: false)
-        return textField
-    }()
-    
-    private lazy var logInButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Log In", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .systemBlue
-        button.layer.cornerRadius = 10
-        button.addTarget(self, action: #selector(logInButtonTapped), for: .touchUpInside)
-        return button
-    }()
-    
-    private lazy var activityIndicator = UIActivityIndicatorView(style: .medium)
-    
-    private lazy var bruteForceButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Подобрать пароль", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .systemRed
-        button.layer.cornerRadius = 10
-        button.addTarget(self, action: #selector(bruteForceTapped), for: .touchUpInside)
-        return button
-    }()
-    
+
     private lazy var errorLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .red
-        label.font = .systemFont(ofSize: 12, weight: .bold)
-        label.textAlignment = .center
-        return label
+        let l = UILabel()
+        l.textColor = .systemRed
+        l.numberOfLines = 0
+        l.textAlignment = .center
+        l.font = .systemFont(ofSize: 13)
+        return l
     }()
-    
-    // MARK: - Инициализация
+
+    private lazy var lockoutLabel: UILabel = {
+        let l = UILabel()
+        l.textColor = .systemRed
+        l.font = .systemFont(ofSize: 14, weight: .bold)
+        l.textAlignment = .center
+        l.isHidden = true
+        return l
+    }()
+
+    private lazy var activity: UIActivityIndicatorView = {
+        let a = UIActivityIndicatorView(style: .medium)
+        a.hidesWhenStopped = true
+        return a
+    }()
+
+    // MARK: - Init
     init(viewModel: LoginViewModeling) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
-        self.viewModel.delegate = self
+        if let vm = viewModel as? LoginViewModel {
+            vm.delegate = self
+        }
     }
-    
-    required init?(coder: NSCoder) { fatalError("init(coder:) не реализован") }
-    
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupView()
+        view.backgroundColor = .white
+        setup()
         setupConstraints()
+        emailField.addTarget(self, action: #selector(fieldsChanged), for: .editingChanged)
+        passwordField.addTarget(self, action: #selector(fieldsChanged), for: .editingChanged)
         viewModel.checkLockoutStatus()
     }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.navigationBar.isHidden = true
-    }
-}
-    // MARK: - UI Setup
-private extension LogInViewController {
-    func setupView() {
-        view.backgroundColor = .white
-        view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
 
-        contentView.addSubviews(views: [
-            logoImageView,
-            lockoutLabel,
-            loginTextField,
-            passwordTextField,
-            logInButton,
-            bruteForceButton,
-            errorLabel,
-            activityIndicator
-        ])
-    }
-
-    func setupConstraints() {
-        scrollView.snp.makeConstraints { $0.edges.equalTo(view.safeAreaLayoutGuide) }
-        contentView.snp.makeConstraints { $0.edges.equalTo(view) }
-
-        logoImageView.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.top.equalToSuperview().offset(120)
-            $0.height.width.equalTo(100)
-        }
-
-        lockoutLabel.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.bottom.equalTo(loginTextField.snp.top).offset(-8)
-            $0.height.equalTo(20)
-        }
-
-        errorLabel.snp.makeConstraints {
-            $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(lockoutLabel.snp.top).offset(-4)
-        }
-
-        loginTextField.snp.makeConstraints {
-            $0.top.equalTo(logoImageView.snp.bottom).offset(120)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(50)
-        }
-
-        passwordTextField.snp.makeConstraints {
-            $0.top.equalTo(loginTextField.snp.bottom).offset(1)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(50)
-        }
-
-        logInButton.snp.makeConstraints {
-            $0.top.equalTo(passwordTextField.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(50)
-        }
-
-        bruteForceButton.snp.makeConstraints {
-            $0.top.equalTo(logInButton.snp.bottom).offset(16)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(50)
-        }
-
-        activityIndicator.snp.makeConstraints {
-            $0.centerY.equalTo(passwordTextField)
-            $0.trailing.equalTo(passwordTextField.snp.trailing).inset(8)
+    @objc private func fieldsChanged() {
+        let email = emailField.text ?? ""
+        let pass = passwordField.text ?? ""
+        let enabled = !email.trimmingCharacters(in: .whitespaces).isEmpty && !pass.isEmpty
+        [loginButton, registerButton].forEach {
+            $0.isEnabled = enabled
+            $0.alpha = enabled ? 1 : 0.5
         }
     }
 
-    // MARK: - Actions
-
-    @objc func logInButtonTapped() {
-        let login = loginTextField.text ?? ""
-        let password = passwordTextField.text ?? ""
-        viewModel.login(login, password)
+    @objc private func loginTapped() {
+        clearUI()
+        activity.startAnimating()
+        viewModel.login(email: emailField.text ?? "", password: passwordField.text ?? "")
     }
 
-    @objc func bruteForceTapped() {
-        let randomPassword = generateRandomPassword(length: 3)
-        activityIndicator.startAnimating()
-        passwordTextField.text = ""
-
-        let bruteForcer = PasswordBruteForcer()
-        bruteForcer.bruteForce(passwordToUnlock: randomPassword) { [weak self] foundPassword in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.activityIndicator.stopAnimating()
-                self.passwordTextField.isSecureTextEntry = false
-                self.passwordTextField.text = foundPassword
-            }
-        }
+    @objc private func registerTapped() {
+        clearUI()
+        activity.startAnimating()
+        viewModel.register(email: emailField.text ?? "", password: passwordField.text ?? "")
     }
 
-    // MARK: - Helpers
-
-    func generateRandomPassword(length: Int) -> String {
-        let characters = String().printable
-        return String((0..<length).compactMap { _ in characters.randomElement() })
-    }
-
-    func showAlert(with message: String) {
-        let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ок", style: .default))
-        present(alert, animated: true)
-    }
-}
-
-// MARK: - LoginViewModelDelegate
-
-extension LogInViewController: LoginViewModelDelegate {
-    func didReceiveErrorMessage(_ message: String?) {
-        guard let message = message else {
-            errorLabel.text = nil
-            return
-        }
-
-        if message.contains("Попытки закончились") {
-            errorLabel.text = message
-        } else {
-            showAlert(with: message)
-        }
-    }
-
-
-
-    func updateLockoutUI(remainingSeconds: Int) {
-        lockoutLabel.text = "Попытки закончились, ждите \(remainingSeconds) сек."
-        lockoutLabel.isHidden = false
-        logInButton.setTitle("Вход заблокирован", for: .normal)
-        logInButton.isEnabled = false
-    }
-
-    func lockoutDidEnd() {
-        logInButton.setTitle("Log In", for: .normal)
-        logInButton.isEnabled = true
+    private func clearUI() {
+        errorLabel.text = nil
         lockoutLabel.isHidden = true
     }
+
+    private func showError(_ text: String) {
+        errorLabel.text = text
+    }
+
+    private func updateLockoutUI(remaining: Int) {
+        lockoutLabel.text = "Попытки закончились, ждите \(remaining) сек."
+        lockoutLabel.isHidden = false
+        loginButton.isEnabled = false
+        registerButton.isEnabled = false
+    }
+
+    private func resetLockoutUI() {
+        loginButton.setTitle("Login", for: .normal)
+        registerButton.setTitle("Register", for: .normal)
+        loginButton.isEnabled = true
+        registerButton.isEnabled = true
+        lockoutLabel.isHidden = true
+    }
+
+    private func setup() {
+        [emailField, passwordField, loginButton, registerButton, errorLabel, lockoutLabel, activity].forEach { view.addSubview($0) }
+    }
+
+    private func setupConstraints() {
+        emailField.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(100)
+            make.leading.trailing.equalToSuperview().inset(24)
+            make.height.equalTo(44)
+        }
+        passwordField.snp.makeConstraints { make in
+            make.top.equalTo(emailField.snp.bottom).offset(12)
+            make.leading.trailing.equalTo(emailField)
+            make.height.equalTo(44)
+        }
+        loginButton.snp.makeConstraints { make in
+            make.top.equalTo(passwordField.snp.bottom).offset(20)
+            make.leading.equalTo(emailField)
+            make.height.equalTo(50)
+            make.width.equalToSuperview().multipliedBy(0.45)
+        }
+        registerButton.snp.makeConstraints { make in
+            make.top.equalTo(passwordField.snp.bottom).offset(20)
+            make.trailing.equalTo(emailField)
+            make.height.equalTo(50)
+            make.width.equalToSuperview().multipliedBy(0.45)
+        }
+        lockoutLabel.snp.makeConstraints { make in
+            make.top.equalTo(loginButton.snp.bottom).offset(8)
+            make.leading.trailing.equalTo(emailField)
+        }
+        errorLabel.snp.makeConstraints { make in
+            make.top.equalTo(lockoutLabel.snp.bottom).offset(4)
+            make.leading.trailing.equalTo(emailField)
+        }
+        activity.snp.makeConstraints { make in
+            make.centerY.equalTo(loginButton)
+            make.trailing.equalTo(loginButton).inset(12)
+        }
+    }
 }
 
-// MARK: - Custom TextField Styling
+extension LogInViewController: LoginViewModelDelegate {
+    func didReceiveError(_ message: String) {
+        activity.stopAnimating()
+        showError(message)
+    }
 
-private extension UITextField {
-    func styleAsInput(topCorners: Bool) {
-        borderStyle = .none
-        layer.borderWidth = 1
-        layer.borderColor = UIColor.black.cgColor
-        layer.cornerRadius = 10
-        layer.maskedCorners = topCorners ? [.layerMinXMinYCorner, .layerMaxXMinYCorner] : [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+    func didUpdateLockout(remainingSeconds: Int) {
+        activity.stopAnimating()
+        updateLockoutUI(remaining: remainingSeconds)
+    }
 
-        leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
-        leftViewMode = .always
-        rightView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: 50))
-        rightViewMode = .always
+    func lockoutEnded() {
+        activity.stopAnimating()
+        resetLockoutUI()
+    }
+
+    func didLoginSuccessfully() {
+        activity.stopAnimating()
+        resetLockoutUI()
+        NotificationCenter.default.post(name: .didLogin, object: nil)
+    }
+
+    func didRegisterSuccessfully() {
+        activity.stopAnimating()
+        resetLockoutUI()
+        NotificationCenter.default.post(name: .didLogin, object: nil)
     }
 }
 

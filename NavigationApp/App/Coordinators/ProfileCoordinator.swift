@@ -13,10 +13,11 @@ final class ProfileCoordinator: Coordinator {
     }
 
     func start() {
-        let user = User(login: "12345", name: "Вася", avatar: UIImage(named: "Шкет") ?? UIImage(systemName: "person.circle"))
+        let avatarImage = UIImage(named: "Шкет") ?? UIImage(systemName: "person.circle")!
+        let user = User(login: "12345", name: "Вася", avatar: avatarImage)
         let viewModel = ProfileViewModel(userDefaultsService: storageService, user: user)
         let profileVC = ProfileViewController(viewModel: viewModel)
-        
+
         profileVC.coordinator = self
         navigationController.setViewControllers([profileVC], animated: false)
     }
@@ -26,3 +27,4 @@ final class ProfileCoordinator: Coordinator {
         navigationController.pushViewController(photosVC, animated: true)
     }
 }
+
