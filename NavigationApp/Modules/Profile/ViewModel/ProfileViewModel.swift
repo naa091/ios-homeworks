@@ -1,10 +1,5 @@
-//
-//  ProfileNewModel.swift
-//  NavigationApp
-//
-//  Created by Александр Нистратов on 18.12.2024.
-//
 import StorageService
+import FirebaseAuth
 
 protocol ProfileViewModeling {
     func logout()
@@ -12,10 +7,10 @@ protocol ProfileViewModeling {
 }
 
 final class ProfileViewModel {
-    private let userDefaultsService: UserDefaultsServicing
+    private let userDefaultsService: UserDefaultsService
     private let user: User
-    
-    init(userDefaultsService: UserDefaultsServicing, user: User) {
+
+    init(userDefaultsService: UserDefaultsService, user: User) {
         self.userDefaultsService = userDefaultsService
         self.user = user
     }
@@ -23,10 +18,17 @@ final class ProfileViewModel {
 
 extension ProfileViewModel: ProfileViewModeling {
     func logout() {
-        userDefaultsService.setLoggedFlag(isLogIn: false)
+        do {
+            try Auth.auth().signOut()
+            userDefaultsService.setIsLoggedFlag(false)
+            NotificationCenter.default.post(name: .didLogout, object: nil)
+        } catch {
+            print("Ошибка выхода: \(error.localizedDescription)")
+        }
     }
-    
+
     func currentUser() -> User {
         user
     }
 }
+

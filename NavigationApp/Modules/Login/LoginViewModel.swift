@@ -1,109 +1,104 @@
-//
-//  LoginViewModel.swift
-//  NavigationApp
-//
-//  Created by Александр Нистратов on 18.12.2024.
-//
+import Foundation
+import FirebaseAuth
 
-import StorageService
-
-protocol LoginViewModeling {
+protocol LoginViewModeling: AnyObject {
     var delegate: LoginViewModelDelegate? { get set }
-    func login(_ login: String, _ password: String)
-    func bruteForcePassword(length: Int, completion: @escaping (String) -> Void)
-    
+    func login(email: String, password: String)
+    func register(email: String, password: String)
     func checkLockoutStatus()
 }
 
-private enum LoginLockoutKeys {
+protocol LoginViewModelDelegate: AnyObject {
+    func didReceiveError(_ message: String)
+    func didUpdateLockout(remainingSeconds: Int)
+    func lockoutEnded()
+    func didLoginSuccessfully()
+    func didRegisterSuccessfully()
+}
+
+private enum LockoutKeys {
     static let failedAttempts = "loginFailedAttempts"
     static let lockoutUntil = "loginLockoutUntil"
 }
 
-import Foundation
-import StorageService
-
-final class LoginViewModel {
-    private let userDefaultsService: UserDefaultsServicing
-    private let userService: UserServicing
-    private let testUserService: TestUserServicing
-    
+final class LoginViewModel: LoginViewModeling {
     weak var delegate: LoginViewModelDelegate?
-    
+
+    private let checkerService: CheckerServiceProtocol
     private var lockoutTimer: Timer?
     private(set) var remainingLockoutSeconds: Int = 0
 
-    init(userDefaultsService: UserDefaultsServicing, userService: UserServicing) {
-        self.userDefaultsService = userDefaultsService
-        self.userService = userService
-        self.testUserService = TestUserService()
+    init(checkerService: CheckerServiceProtocol = CheckerService()) {
+        self.checkerService = checkerService
     }
-}
 
-extension LoginViewModel: LoginViewModeling {
+    func login(email: String, password: String) {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedEmail.isEmpty, !password.isEmpty else {
+            delegate?.didReceiveError("Email и пароль обязательны.")
+            return
+        }
+        guard isValidEmail(trimmedEmail) else {
+            delegate?.didReceiveError("Неверный формат e-mail.")
+            return
+        }
 
-    func login(_ login: String, _ password: String) {
-        do {
-            let validatedLogin = try validateLogin(login)
-            let validatedPassword = try validatePassword(password)
+        if isLockedOut() {
+            return
+        }
 
-            let result: Result<User, Error>
-            #if DEBUG
-            result = testUserService.testAuth(login: validatedLogin, password: validatedPassword)
-                .mapError { $0 as Error }
-            #else
-            result = userService.auth(login: validatedLogin, password: validatedPassword)
-                .mapError { $0 as Error }
-            #endif
+        checkerService.checkCredentials(email: trimmedEmail, password: password) { [weak self] result in
+            guard let self = self else { return }
 
-            handleLogin(result: result)
-
-        } catch {
-            delegate?.didReceiveErrorMessage(error.localizedDescription)
+            switch result {
+            case .success:
+                self.clearLockout()
+                self.delegate?.didLoginSuccessfully()
+            case .failure(let error):
+                if let err = error as NSError?, AuthErrorCode(rawValue: err.code) == .userNotFound {
+                    self.delegate?.didReceiveError("Пользователь не найден. Зарегистрируйтесь.")
+                } else if let err = error as NSError?, AuthErrorCode(rawValue: err.code) == .wrongPassword {
+                    self.processFailedAttempt()
+                    self.delegate?.didReceiveError("Неправильный пароль.")
+                } else {
+                    self.processFailedAttempt()
+                    self.delegate?.didReceiveError(self.mapFirebaseError(error))
+                }
+            }
         }
     }
 
-    private func validateLogin(_ login: String?) throws -> String {
-        guard let login = login, !login.isEmpty else {
-            throw LoginError.emptyLogin
+    func register(email: String, password: String) {
+        let trimmedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedEmail.isEmpty, !password.isEmpty else {
+            delegate?.didReceiveError("Email и пароль обязательны.")
+            return
         }
-        return login
-    }
-
-    private func validatePassword(_ password: String?) throws -> String {
-        guard let password = password, !password.isEmpty else {
-            throw LoginError.emptyPassword
+        guard isValidEmail(trimmedEmail) else {
+            delegate?.didReceiveError("Неверный формат e-mail.")
+            return
         }
-        return password
-    }
 
-    private func handleLogin(result: Result<User, Error>) {
-        switch result {
-        case .success(let user):
-            print("✅ Успешный вход: \(user.name)")
-            userDefaultsService.setLoggedFlag(isLogIn: true)
-        case .failure(let error):
-            print("🚨 Ошибка входа: \(error.localizedDescription)")
-            userDefaultsService.setLoggedFlag(isLogIn: false)
-            processFailedAttempt()
-            delegate?.didReceiveErrorMessage(error.localizedDescription)
+        if isLockedOut() {
+            return
         }
-    }
 
-    private func processFailedAttempt() {
-        var attempts = UserDefaults.standard.integer(forKey: LoginLockoutKeys.failedAttempts)
-        attempts += 1
-        UserDefaults.standard.set(attempts, forKey: LoginLockoutKeys.failedAttempts)
+        checkerService.signUp(email: trimmedEmail, password: password) { [weak self] result in
+            guard let self = self else { return }
 
-        if attempts >= 3 {
-            let lockoutUntil = Date().addingTimeInterval(30)
-            UserDefaults.standard.set(lockoutUntil, forKey: LoginLockoutKeys.lockoutUntil)
-            startLockoutTimer(seconds: 30)
+            switch result {
+            case .success:
+                self.clearLockout()
+                self.delegate?.didRegisterSuccessfully()
+            case .failure(let error):
+                self.processFailedAttempt()
+                self.delegate?.didReceiveError(self.mapFirebaseError(error))
+            }
         }
     }
 
     func checkLockoutStatus() {
-        if let lockoutUntil = UserDefaults.standard.object(forKey: LoginLockoutKeys.lockoutUntil) as? Date {
+        if let lockoutUntil = UserDefaults.standard.object(forKey: LockoutKeys.lockoutUntil) as? Date {
             let remaining = Int(lockoutUntil.timeIntervalSinceNow)
             if remaining > 0 {
                 startLockoutTimer(seconds: remaining)
@@ -115,35 +110,81 @@ extension LoginViewModel: LoginViewModeling {
         }
     }
 
+    // MARK: - Helpers
+
+    private func isValidEmail(_ email: String) -> Bool {
+        let predicate = NSPredicate(
+            format: "SELF MATCHES %@",
+            "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+        )
+        return predicate.evaluate(with: email)
+    }
+
+    private func isLockedOut() -> Bool {
+        if let lockoutUntil = UserDefaults.standard.object(forKey: LockoutKeys.lockoutUntil) as? Date {
+            let remaining = Int(lockoutUntil.timeIntervalSinceNow)
+            if remaining > 0 {
+                startLockoutTimer(seconds: remaining)
+                delegate?.didReceiveError("Попытки закончились, ждите \(remaining) сек.")
+                return true
+            } else {
+                clearLockout()
+            }
+        }
+        return false
+    }
+
+    private func processFailedAttempt() {
+        var attempts = UserDefaults.standard.integer(forKey: LockoutKeys.failedAttempts)
+        attempts += 1
+        UserDefaults.standard.set(attempts, forKey: LockoutKeys.failedAttempts)
+
+        if attempts >= 3 {
+            let lockoutUntil = Date().addingTimeInterval(30)
+            UserDefaults.standard.set(lockoutUntil, forKey: LockoutKeys.lockoutUntil)
+            startLockoutTimer(seconds: 30)
+            delegate?.didReceiveError("Попытки закончились, ждите 30 сек.")
+        }
+    }
+
     private func startLockoutTimer(seconds: Int) {
-        remainingLockoutSeconds = seconds
-        delegate?.didReceiveErrorMessage("Попытки закончились, ждите \(seconds) сек.")
+        remainingLockoutSeconds = max(0, seconds)
+        delegate?.didUpdateLockout(remainingSeconds: remainingLockoutSeconds)
 
         lockoutTimer?.invalidate()
         lockoutTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
             guard let self = self else { return }
-            self.remainingLockoutSeconds -= 1
+            self.remainingLockoutSeconds = max(0, self.remainingLockoutSeconds - 1)
             if self.remainingLockoutSeconds > 0 {
-                self.delegate?.didReceiveErrorMessage("Попытки закончились, ждите \(self.remainingLockoutSeconds) сек.")
+                self.delegate?.didUpdateLockout(remainingSeconds: self.remainingLockoutSeconds)
             } else {
                 timer.invalidate()
                 self.clearLockout()
+                self.delegate?.lockoutEnded()
             }
         }
     }
 
     private func clearLockout() {
-        UserDefaults.standard.set(0, forKey: LoginLockoutKeys.failedAttempts)
-        UserDefaults.standard.removeObject(forKey: LoginLockoutKeys.lockoutUntil)
-        delegate?.didReceiveErrorMessage(nil)
+        UserDefaults.standard.set(0, forKey: LockoutKeys.failedAttempts)
+        UserDefaults.standard.removeObject(forKey: LockoutKeys.lockoutUntil)
+        lockoutTimer?.invalidate()
     }
 
-    func bruteForcePassword(length: Int, completion: @escaping (String) -> Void) {
-        let characters = String().printable
-        let passwordToUnlock = String((0..<length).compactMap { _ in characters.randomElement() })
-        let bruteForcer = PasswordBruteForcer()
-        bruteForcer.bruteForce(passwordToUnlock: passwordToUnlock) { found in
-            completion(found)
+    private func mapFirebaseError(_ error: Error) -> String {
+        if let err = error as NSError? {
+            switch AuthErrorCode(rawValue: err.code) {
+            case .invalidEmail:
+                return "Неверный e-mail."
+            case .emailAlreadyInUse:
+                return "Электронная почта уже используется."
+            case .weakPassword:
+                return "Пароль слишком слабый."
+            default:
+                return error.localizedDescription
+            }
         }
+        return error.localizedDescription
     }
 }
+
